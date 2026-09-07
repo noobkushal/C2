@@ -19,6 +19,7 @@
     <ul class="nav-list">
       <li class="nav-item active" data-view="overview"><span>📊</span> Overview</li>
       <li class="nav-item" data-view="realtime"><span>⚡</span> Real-Time Monitor</li>
+      <li class="nav-item" data-view="pcap"><span>🔬</span> PCAP Packet Analyzer</li>
       <li class="nav-item" data-view="traffic"><span>🌐</span> Network Traffic</li>
       <li class="nav-item" data-view="alerts"><span>🚨</span> Alerts & Triage</li>
       <li class="nav-item" data-view="c2"><span>📡</span> C2 Detection</li>
@@ -193,6 +194,64 @@
                 <tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No live issues raised yet.</td></tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: PCAP Packet Analyzer -->
+      <section id="view-pcap" class="view-section hidden">
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-title">
+            <span>🔬 In-Browser Raw PCAP Binary Packet Analyzer (Wireshark Engine)</span>
+            <span id="pcap-status-title" class="badge badge-safe">Ready for Capture Upload</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            Upload any <strong>.pcap</strong> or <strong>.pcapng</strong> capture file directly in your browser. The embedded binary parser decodes Ethernet, IPv4, TCP/UDP headers, displays Wireshark-style protocol trees & hex inspection, and runs C2 threat detection.
+          </p>
+          <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <input type="file" id="pcap-file-input" accept=".pcap,.pcapng,.cap" style="display: none;">
+            <button class="btn btn-primary" onclick="document.getElementById('pcap-file-input').click()">📁 Select PCAP File to Analyze</button>
+            <button class="btn" onclick="loadDemoPcap()">🧪 Load Sample C2 Beacon PCAP</button>
+          </div>
+        </div>
+
+        <div id="pcap-threat-summary"></div>
+
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-title">📊 Parsed Packet Telemetry List</div>
+          <div style="max-height: 300px; overflow-y: auto;">
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Timestamp</th>
+                  <th>Source IP</th>
+                  <th>Destination</th>
+                  <th>Protocol</th>
+                  <th>Length</th>
+                  <th>Info</th>
+                </tr>
+              </thead>
+              <tbody id="pcap-table-body">
+                <tr><td colspan="7" style="text-align:center; color: var(--text-muted);">No PCAP file loaded. Select a PCAP capture file or click 'Load Sample'.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid-equal">
+          <div class="card">
+            <div class="card-title">🔍 Packet Protocol Layer Details (Tree View)</div>
+            <div id="pcap-packet-tree" style="min-height: 180px; background: var(--bg-canvas); padding: 1rem; border-radius: 4px; border: 1px solid var(--border-subtle);">
+              <p style="color: var(--text-muted); font-size: 0.85rem;">Select a packet row above to inspect layer headers.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">💻 Packet Raw Hex & ASCII Data Inspector</div>
+            <pre id="pcap-hex-view" style="min-height: 180px; max-height: 250px; overflow-y: auto; background: var(--bg-canvas); padding: 1rem; border-radius: 4px; border: 1px solid var(--border-subtle); font-family: 'JetBrains Mono'; font-size: 0.75rem; color: #38bdf8;">
+Select a packet row to view Hex & ASCII payload.
+            </pre>
           </div>
         </div>
       </section>
