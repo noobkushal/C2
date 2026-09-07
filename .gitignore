@@ -1,0 +1,13 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+data/raw/*.pcap
+data/raw/*.pcapng
+data/zeek/**/*.log
+*.db
+.streamlit/secrets.toml
+data/processed/*.log
