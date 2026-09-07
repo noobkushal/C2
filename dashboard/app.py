@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.database.database import init_db
+from src.services.auth_service import verify_session
 from dashboard.theme import apply_soc_theme
 
 st.set_page_config(
@@ -21,10 +22,27 @@ init_db()
 # Apply Stitch enterprise SOC dark theme
 apply_soc_theme()
 
+# Session State Initialization
+if "session_token" not in st.session_state:
+    st.session_state["session_token"] = None
+if "current_page" not in st.session_state:
+    st.session_state["current_page"] = "Overview"
+if "selected_alert_id" not in st.session_state:
+    st.session_state["selected_alert_id"] = None
+
+current_user = verify_session(st.session_state["session_token"]) if st.session_state["session_token"] else None
+
 st.sidebar.title("🛡️ NetWatch SOC")
 st.sidebar.caption("Network Traffic & C2 Detection Lab")
 
+if current_user:
+    role_color = "red" if current_user['role'] == "ADMIN" else "blue"
+    st.sidebar.markdown(f"👤 User: **{current_user['username']}** (:{role_color}[{current_user['role']}])")
+else:
+    st.sidebar.warning("🔒 Not Logged In — Access Restricted")
+
 pages = {
+    "Login / Auth": "dashboard/pages/login.py",
     "Overview": "dashboard/pages/overview.py",
     "Real-Time Monitor": "dashboard/pages/realtime_monitor.py",
     "Network Traffic": "dashboard/pages/network_traffic.py",
@@ -39,26 +57,17 @@ pages = {
     "Settings": "dashboard/pages/settings.py",
 }
 
-# Session state initialization for page navigation and selection
-if "current_page" not in st.session_state:
-    st.session_state["current_page"] = "Overview"
-if "selected_alert_id" not in st.session_state:
-    st.session_state["selected_alert_id"] = None
-
-def navigate_to(page_name: str):
-    st.session_state["current_page"] = page_name
-
 selected_page = st.sidebar.radio(
     "Navigation",
     list(pages.keys()),
-    index=list(pages.keys()).index(st.session_state["current_page"])
+    index=list(pages.keys()).index(st.session_state["current_page"]) if st.session_state["current_page"] in pages else 0
 )
 
 if selected_page != st.session_state["current_page"]:
     st.session_state["current_page"] = selected_page
 
 st.sidebar.divider()
-st.sidebar.info("Operational Status: ONLINE\nMode: Local Telemetry Lab")
+st.sidebar.info("Operational Status: ONLINE\nMode: Real-World NIC & Telemetry Lab")
 
 # Load selected page script dynamically
 page_file = pages[st.session_state["current_page"]]

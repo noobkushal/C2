@@ -53,6 +53,7 @@ const SAMPLE_DATA = {
 };
 
 let currentView = "overview";
+let currentUser = { username: "admin", role: "ADMIN" };
 let isAdminConsentGranted = false;
 let isLiveSniffingActive = false;
 let sniffIntervalTimer = null;
@@ -65,7 +66,7 @@ function switchView(viewName) {
 
   const titles = {
     overview: ["Security Operations Overview", "Real-time telemetry and active threat metrics"],
-    realtime: ["Real-Time Live Packet Monitor & Issue Generator", "Live network packet sniffer, admin permission governance, and streaming issue emitter"],
+    realtime: ["Real-Time Live Packet Monitor & Issue Generator", "Live physical NIC packet sniffer, admin permission governance, and streaming issue emitter"],
     traffic: ["Network Traffic Telemetry", "Search, filter, and inspect raw network flow events"],
     alerts: ["Alert Management & Triage", "Active detection alerts requiring SOC analyst investigation"],
     c2: ["C2 Beaconing Analytics & Regularity Analyzer", "Statistical interval variance detection for beaconing command-and-control behavior"],
@@ -87,7 +88,58 @@ function switchView(viewName) {
   if (viewName === 'c2') renderC2Chart();
 }
 
+// Authentication Modal Handlers
+function openLoginModal() {
+  document.getElementById('login-modal-overlay')?.classList.add('active');
+}
+
+function closeLoginModal() {
+  document.getElementById('login-modal-overlay')?.classList.remove('active');
+}
+
+function performLogin() {
+  const userInput = document.getElementById('login-input-user')?.value || 'admin';
+  const role = userInput.toLowerCase() === 'admin' ? 'ADMIN' : 'ANALYST';
+  currentUser = { username: userInput, role: role };
+  updateUserUI();
+  closeLoginModal();
+
+  // If user changed to non-admin while consent was granted, revoke consent
+  if (role !== 'ADMIN' && isAdminConsentGranted) {
+    revokeConsent();
+  }
+}
+
+function quickLogin(targetRole) {
+  if (targetRole === 'analyst') {
+    currentUser = { username: 'analyst', role: 'ANALYST' };
+  } else {
+    currentUser = { username: 'admin', role: 'ADMIN' };
+  }
+  updateUserUI();
+  closeLoginModal();
+
+  if (currentUser.role !== 'ADMIN' && isAdminConsentGranted) {
+    revokeConsent();
+  }
+}
+
+function updateUserUI() {
+  const nameEl = document.getElementById('user-name');
+  const roleEl = document.getElementById('user-role');
+  if (nameEl) nameEl.innerText = currentUser.username;
+  if (roleEl) {
+    roleEl.innerText = currentUser.role;
+    roleEl.className = currentUser.role === 'ADMIN' ? 'badge badge-critical' : 'badge badge-high';
+  }
+}
+
+// Permission & Consent Management
 function grantConsent() {
+  if (currentUser.role !== 'ADMIN') {
+    alert("Permission Denied: Only logged in users with ADMIN role can grant Admin Consent for live network packet scanning.");
+    return;
+  }
   isAdminConsentGranted = true;
   document.getElementById('admin-perm-btn').innerText = "Admin Consent: GRANTED 🔓";
   document.getElementById('admin-perm-btn').classList.add('btn-primary');
@@ -119,7 +171,10 @@ function toggleAdminConsent() {
 }
 
 function toggleSniffing() {
-  if (!isAdminConsentGranted) return;
+  if (!isAdminConsentGranted || currentUser.role !== 'ADMIN') {
+    alert("Cannot start scanning without ADMIN role and explicit Admin Consent.");
+    return;
+  }
 
   const btn = document.getElementById('sniff-toggle-btn');
   if (isLiveSniffingActive) {

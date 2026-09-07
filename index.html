@@ -42,7 +42,9 @@
         <h1 id="view-title">Security Operations Overview</h1>
         <p id="view-subtitle">Real-time telemetry and active threat metrics</p>
       </div>
-      <div style="display: flex; gap: 0.75rem;">
+      <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <span id="user-badge" style="font-size: 0.85rem; color: var(--text-secondary);">👤 Logged in as: <strong id="user-name">admin</strong> (<span id="user-role" class="badge badge-critical">ADMIN</span>)</span>
+        <button id="login-btn" class="btn" onclick="openLoginModal()">Login 🔑</button>
         <button id="admin-perm-btn" class="btn" onclick="toggleAdminConsent()">Admin Consent: REVOKED 🔒</button>
         <button class="btn btn-primary" onclick="exportReport('json')">Export Report 📥</button>
       </div>
@@ -145,15 +147,15 @@
       <section id="view-realtime" class="view-section hidden">
         <div class="card" style="margin-bottom: 1.5rem;">
           <div class="card-title">
-            <span>🛡️ Admin Permission & Live Sniffer Controls</span>
+            <span>🛡️ Admin Permission & Real-World Network Interface Scanner</span>
             <span id="perm-badge" class="badge badge-critical">PERMISSION: REVOKED</span>
           </div>
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
-            Real-time packet scanning requires explicit Admin Consent. Grant permission below to activate live packet ingestion and instant threat detection.
+            Real-world live network scanning requires active user login with <strong>ADMIN</strong> role and explicit Admin Consent confirmation.
           </p>
           <div style="display: flex; gap: 1rem; align-items: center;">
-            <button id="grant-btn" class="btn btn-primary" onclick="grantConsent()">Grant Admin Permission 🔓</button>
-            <button id="revoke-btn" class="btn" onclick="revokeConsent()" style="display:none;">Revoke Permission ⛔</button>
+            <button id="grant-btn" class="btn btn-primary" onclick="grantConsent()">Grant Admin Consent 🔓</button>
+            <button id="revoke-btn" class="btn" onclick="revokeConsent()" style="display:none;">Revoke Consent ⛔</button>
             <button id="sniff-toggle-btn" class="btn" onclick="toggleSniffing()" disabled>Start Live Packet Sniffing ▶</button>
           </div>
         </div>
@@ -411,6 +413,33 @@ application:
 
     </div>
   </main>
+
+  <!-- Login Modal -->
+  <div id="login-modal-overlay" class="drawer-overlay">
+    <div class="drawer-content" style="width: 420px; height: auto; border-radius: 8px; margin: auto; position: relative;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 style="font-size: 1.1rem;">🔑 User Authentication</h2>
+        <button onclick="closeLoginModal()" class="btn">✕</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
+        Select account role or enter credentials to switch session:
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+        <div>
+          <label style="font-size: 0.75rem; color: var(--text-muted);">Username</label>
+          <input id="login-input-user" type="text" value="admin" style="width:100%; padding:0.5rem; background:var(--bg-canvas); border:1px solid var(--border-subtle); color:#fff; border-radius:4px;">
+        </div>
+        <div>
+          <label style="font-size: 0.75rem; color: var(--text-muted);">Password</label>
+          <input id="login-input-pass" type="password" value="Admin@123" style="width:100%; padding:0.5rem; background:var(--bg-canvas); border:1px solid var(--border-subtle); color:#fff; border-radius:4px;">
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+          <button class="btn btn-primary" onclick="performLogin()" style="flex:1;">Login 🔓</button>
+          <button class="btn" onclick="quickLogin('analyst')" style="flex:1;">Analyst Login</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Alert Inspection Drawer Modal -->
   <div id="drawer-overlay" class="drawer-overlay">
