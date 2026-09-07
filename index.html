@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NetWatch SOC — Network Traffic & C2 Detection Lab</title>
+  <title>NetWatch SOC — Network Traffic & Real-Time C2 Detection Lab</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -18,6 +18,7 @@
 
     <ul class="nav-list">
       <li class="nav-item active" data-view="overview"><span>📊</span> Overview</li>
+      <li class="nav-item" data-view="realtime"><span>⚡</span> Real-Time Monitor</li>
       <li class="nav-item" data-view="traffic"><span>🌐</span> Network Traffic</li>
       <li class="nav-item" data-view="alerts"><span>🚨</span> Alerts & Triage</li>
       <li class="nav-item" data-view="c2"><span>📡</span> C2 Detection</li>
@@ -29,7 +30,7 @@
     </ul>
 
     <div class="sidebar-footer">
-      <p><span class="status-dot"></span> Status: ONLINE</p>
+      <p><span id="live-indicator" class="status-dot"></span> Status: <span id="status-text">ONLINE</span></p>
       <p style="margin-top: 4px; color: var(--text-muted);">GitHub Pages Deployment</p>
     </div>
   </aside>
@@ -41,7 +42,8 @@
         <h1 id="view-title">Security Operations Overview</h1>
         <p id="view-subtitle">Real-time telemetry and active threat metrics</p>
       </div>
-      <div>
+      <div style="display: flex; gap: 0.75rem;">
+        <button id="admin-perm-btn" class="btn" onclick="toggleAdminConsent()">Admin Consent: REVOKED 🔒</button>
         <button class="btn btn-primary" onclick="exportReport('json')">Export Report 📥</button>
       </div>
     </header>
@@ -53,11 +55,11 @@
         <div class="kpi-grid">
           <div class="kpi-card">
             <div class="kpi-label">Network Events</div>
-            <div class="kpi-value">860</div>
+            <div class="kpi-value" id="kpi-net-events">860</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">Active Alerts</div>
-            <div class="kpi-value" style="color: var(--sev-high)">128</div>
+            <div class="kpi-value" id="kpi-alerts" style="color: var(--sev-high)">128</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-label">High/Critical</div>
@@ -106,7 +108,7 @@
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="overview-alerts-tbody">
               <tr>
                 <td>2026-09-07 15:52:12</td>
                 <td>BEACONING</td>
@@ -136,6 +138,60 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- View: Real-Time Monitor -->
+      <section id="view-realtime" class="view-section hidden">
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-title">
+            <span>🛡️ Admin Permission & Live Sniffer Controls</span>
+            <span id="perm-badge" class="badge badge-critical">PERMISSION: REVOKED</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            Real-time packet scanning requires explicit Admin Consent. Grant permission below to activate live packet ingestion and instant threat detection.
+          </p>
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <button id="grant-btn" class="btn btn-primary" onclick="grantConsent()">Grant Admin Permission 🔓</button>
+            <button id="revoke-btn" class="btn" onclick="revokeConsent()" style="display:none;">Revoke Permission ⛔</button>
+            <button id="sniff-toggle-btn" class="btn" onclick="toggleSniffing()" disabled>Start Live Packet Sniffing ▶</button>
+          </div>
+        </div>
+
+        <div class="grid-equal">
+          <div class="card">
+            <div class="card-title">⚡ Live Captured Packets Stream</div>
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Source IP</th>
+                  <th>Destination</th>
+                  <th>Proto</th>
+                </tr>
+              </thead>
+              <tbody id="realtime-packets-tbody">
+                <tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Live sniffing stopped. Grant permission to start stream.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🔥 Real-Time Raised Issues & Alerts</div>
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Issue Type</th>
+                  <th>Flow Pair</th>
+                  <th>Severity</th>
+                </tr>
+              </thead>
+              <tbody id="realtime-alerts-tbody">
+                <tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No live issues raised yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 

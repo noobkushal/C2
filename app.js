@@ -21,14 +21,7 @@ const SAMPLE_DATA = {
       confidence: 0.85,
       risk_score: 100,
       reason: "Regular-interval connections (CV=0.0125) with 30 connections; Rare destination 10.0.0.99; Port 8443 not in common allowed ports",
-      status: "NEW",
-      signals: [
-        { name: "repeated_connections", points: 30, detail: "30 connections observed" },
-        { name: "low_interval_variation", points: 25, detail: "CV=0.0125 <= 0.15" },
-        { name: "fixed_destination", points: 20, detail: "Fixed destination 10.0.0.99:8443" },
-        { name: "rare_destination", points: 10, detail: "10.0.0.99 rarely contacted" },
-        { name: "unusual_port", points: 10, detail: "Port 8443 not in common allowlist" }
-      ]
+      status: "NEW"
     },
     {
       id: "4fafa33d-6afe-4115-baf0-06d115fc752d",
@@ -41,11 +34,7 @@ const SAMPLE_DATA = {
       confidence: 0.65,
       risk_score: 75,
       reason: "Rare destination 192.168.99.99; Port 4444 not in common allowlist",
-      status: "INVESTIGATING",
-      signals: [
-        { name: "rare_destination", points: 25, detail: "Contacted by single host" },
-        { name: "unusual_port", points: 10, detail: "Port 4444 watch list match" }
-      ]
+      status: "INVESTIGATING"
     },
     {
       id: "dns-tunnel-001",
@@ -58,28 +47,16 @@ const SAMPLE_DATA = {
       confidence: 0.85,
       risk_score: 80,
       reason: "Long domain (>55 chars); 8 distinct subdomains under base domain exfiltration-tunnel.test.org",
-      status: "NEW",
-      signals: [
-        { name: "long_domain", points: 25, detail: "encoded-c2-stage2-exfil-payload.malicious-sim.org" },
-        { name: "excessive_subdomains", points: 40, detail: "8 distinct subdomains label count" }
-      ]
-    }
-  ],
-  beaconCandidates: [
-    {
-      source_ip: "192.168.1.100",
-      destination_ip: "10.0.0.99",
-      port: 8443,
-      conns: 30,
-      avgInterval: 30.01,
-      stdev: 0.38,
-      cv: 0.0125,
-      score: 100
+      status: "NEW"
     }
   ]
 };
 
 let currentView = "overview";
+let isAdminConsentGranted = false;
+let isLiveSniffingActive = false;
+let sniffIntervalTimer = null;
+let livePacketCount = 0;
 
 function switchView(viewName) {
   currentView = viewName;
@@ -88,6 +65,7 @@ function switchView(viewName) {
 
   const titles = {
     overview: ["Security Operations Overview", "Real-time telemetry and active threat metrics"],
+    realtime: ["Real-Time Live Packet Monitor & Issue Generator", "Live network packet sniffer, admin permission governance, and streaming issue emitter"],
     traffic: ["Network Traffic Telemetry", "Search, filter, and inspect raw network flow events"],
     alerts: ["Alert Management & Triage", "Active detection alerts requiring SOC analyst investigation"],
     c2: ["C2 Beaconing Analytics & Regularity Analyzer", "Statistical interval variance detection for beaconing command-and-control behavior"],
@@ -107,6 +85,109 @@ function switchView(viewName) {
 
   if (viewName === 'overview') renderOverviewCharts();
   if (viewName === 'c2') renderC2Chart();
+}
+
+function grantConsent() {
+  isAdminConsentGranted = true;
+  document.getElementById('admin-perm-btn').innerText = "Admin Consent: GRANTED 🔓";
+  document.getElementById('admin-perm-btn').classList.add('btn-primary');
+  document.getElementById('perm-badge').className = "badge badge-safe";
+  document.getElementById('perm-badge').innerText = "PERMISSION: GRANTED";
+  
+  document.getElementById('grant-btn').style.display = "none";
+  document.getElementById('revoke-btn').style.display = "inline-block";
+  document.getElementById('sniff-toggle-btn').disabled = false;
+}
+
+function revokeConsent() {
+  isAdminConsentGranted = false;
+  if (isLiveSniffingActive) toggleSniffing();
+
+  document.getElementById('admin-perm-btn').innerText = "Admin Consent: REVOKED 🔒";
+  document.getElementById('admin-perm-btn').classList.remove('btn-primary');
+  document.getElementById('perm-badge').className = "badge badge-critical";
+  document.getElementById('perm-badge').innerText = "PERMISSION: REVOKED";
+  
+  document.getElementById('grant-btn').style.display = "inline-block";
+  document.getElementById('revoke-btn').style.display = "none";
+  document.getElementById('sniff-toggle-btn').disabled = true;
+}
+
+function toggleAdminConsent() {
+  if (isAdminConsentGranted) revokeConsent();
+  else grantConsent();
+}
+
+function toggleSniffing() {
+  if (!isAdminConsentGranted) return;
+
+  const btn = document.getElementById('sniff-toggle-btn');
+  if (isLiveSniffingActive) {
+    isLiveSniffingActive = false;
+    clearInterval(sniffIntervalTimer);
+    btn.innerText = "Start Live Packet Sniffing ▶";
+    btn.classList.remove('btn-primary');
+    document.getElementById('status-text').innerText = "ONLINE";
+  } else {
+    isLiveSniffingActive = true;
+    btn.innerText = "Stop Sniffing ⏹";
+    btn.classList.add('btn-primary');
+    document.getElementById('status-text').innerText = "SNIFFING LIVE";
+    
+    // Clear placeholder row
+    document.getElementById('realtime-packets-tbody').innerHTML = "";
+    
+    sniffIntervalTimer = setInterval(generateLivePacketStream, 1500);
+  }
+}
+
+function generateLivePacketStream() {
+  if (!isLiveSniffingActive) return;
+
+  livePacketCount++;
+  SAMPLE_DATA.kpis.networkEvents++;
+  document.getElementById('kpi-net-events').innerText = SAMPLE_DATA.kpis.networkEvents;
+
+  const sources = ["192.168.1.100", "192.168.1.105", "192.168.1.12", "192.168.1.50"];
+  const dests = ["10.0.0.99:8443", "10.0.0.1:80", "8.8.8.8:53", "192.168.99.99:4444"];
+  const protos = ["TCP", "UDP"];
+
+  const src = sources[Math.floor(Math.random() * sources.length)];
+  const dst = dests[Math.floor(Math.random() * dests.length)];
+  const proto = protos[Math.floor(Math.random() * protos.length)];
+  const now = new Date().toISOString().substring(11, 19);
+
+  const tbody = document.getElementById('realtime-packets-tbody');
+  const rowHtml = `<tr><td>${now}</td><td>${src}</td><td>${dst}</td><td>${proto}</td></tr>`;
+  tbody.insertAdjacentHTML('afterbegin', rowHtml);
+
+  if (tbody.children.length > 15) tbody.removeChild(tbody.lastChild);
+
+  // Trigger live alert raising every 5th packet
+  if (livePacketCount % 5 === 0) {
+    raiseLiveIssue(src, dst);
+  }
+}
+
+function raiseLiveIssue(src, dst) {
+  SAMPLE_DATA.kpis.activeAlerts++;
+  document.getElementById('kpi-alerts').innerText = SAMPLE_DATA.kpis.activeAlerts;
+
+  const atypes = ["BEACONING", "SUSPICIOUS_PORT", "DNS_ANOMALY"];
+  const sevs = ["CRITICAL", "HIGH", "MEDIUM"];
+  const atype = atypes[Math.floor(Math.random() * atypes.length)];
+  const sev = sevs[Math.floor(Math.random() * sevs.length)];
+  const now = new Date().toISOString().substring(11, 19);
+
+  const tbody = document.getElementById('realtime-alerts-tbody');
+  const rowHtml = `<tr>
+    <td>${now}</td>
+    <td>${atype}</td>
+    <td>${src} ➔ ${dst}</td>
+    <td><span class="badge badge-${sev.toLowerCase()}">${sev}</span></td>
+  </tr>`;
+  tbody.insertAdjacentHTML('afterbegin', rowHtml);
+  if (tbody.children.length > 10) tbody.removeChild(tbody.lastChild);
 }
 
 function renderOverviewCharts() {

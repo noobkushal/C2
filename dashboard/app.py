@@ -26,6 +26,7 @@ st.sidebar.caption("Network Traffic & C2 Detection Lab")
 
 pages = {
     "Overview": "dashboard/pages/overview.py",
+    "Real-Time Monitor": "dashboard/pages/realtime_monitor.py",
     "Network Traffic": "dashboard/pages/network_traffic.py",
     "Alerts": "dashboard/pages/alerts.py",
     "Investigation": "dashboard/pages/investigation.py",
