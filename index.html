@@ -26,7 +26,7 @@
       <li class="nav-item" data-view="evidence"><span>📁</span> Evidence Locker</li>
       <li class="nav-item" data-view="rules"><span>⚙️</span> Detection Rules</li>
       <li class="nav-item" data-view="reports"><span>📄</span> Reports</li>
-      <li class="nav-item" data-view="settings"><span>🔧</span> Settings</li>
+      <li class="nav-item" data-view="settings"><span>🔧</span> System & Setup Guide</li>
     </ul>
 
     <div class="sidebar-footer">
@@ -398,15 +398,37 @@
         </div>
       </section>
 
-      <!-- View: Settings -->
+      <!-- View: Settings & Documentation -->
       <section id="view-settings" class="view-section hidden">
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-title">🚀 Local Physical NIC Packet Scanner Guide</div>
+          <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            To capture <strong>real live physical network packets</strong> (like Wireshark & Burp Suite):
+          </p>
+          <ol style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6; padding-left: 1.25rem;">
+            <li><strong>Install Npcap Driver</strong>: Run <code>install_npcap.bat</code> (bundled in the repository at <code>installers/npcap-setup.exe</code>).</li>
+            <li><strong>Run Streamlit SOC Dashboard</strong>: Right-click <code>start_soc.bat</code> and select <strong>Run as Administrator</strong>.</li>
+            <li><strong>Open Local SOC Cockpit</strong>: Go to <code>http://localhost:8501</code> in your browser.</li>
+            <li><strong>Log In Credentials</strong>:
+              <ul>
+                <li><strong>Admin Account</strong>: <code>admin</code> / <code>Admin@123</code> (Role: <code>ADMIN</code>)</li>
+                <li><strong>Analyst Account</strong>: <code>analyst</code> / <code>Analyst@123</code> (Role: <code>ANALYST</code>)</li>
+              </ul>
+            </li>
+          </ol>
+        </div>
+
         <div class="card">
-          <div class="card-title">🔧 Operational Configuration</div>
-          <pre style="background-color: var(--bg-canvas); padding: 1rem; border-radius: 4px; font-family: 'JetBrains Mono'; font-size: 0.8rem;">
+          <div class="card-title">🔧 Operational System Configuration</div>
+          <pre style="background-color: var(--bg-canvas); padding: 1rem; border-radius: 4px; font-family: 'JetBrains Mono'; font-size: 0.8rem; color: #38bdf8;">
+repository: "https://github.com/noobkushal/C2.git"
+github_pages: "https://noobkushal.github.io/C2/"
 application:
   db_path: "data/netwatch.db"
   log_level: "INFO"
   analysis_window_hours: 24
+  bundled_driver: "installers/npcap-setup.exe"
+  launch_script: "start_soc.bat"
           </pre>
         </div>
       </section>
