@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetWatch SOC — Network Traffic & C2 Detection Lab</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Sidebar Nav -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">🛡️</span>
+      <span>NetWatch SOC</span>
+    </div>
+
+    <ul class="nav-list">
+      <li class="nav-item active" data-view="overview"><span>📊</span> Overview</li>
+      <li class="nav-item" data-view="traffic"><span>🌐</span> Network Traffic</li>
+      <li class="nav-item" data-view="alerts"><span>🚨</span> Alerts & Triage</li>
+      <li class="nav-item" data-view="c2"><span>📡</span> C2 Detection</li>
+      <li class="nav-item" data-view="dns"><span>🔍</span> DNS Analysis</li>
+      <li class="nav-item" data-view="evidence"><span>📁</span> Evidence Locker</li>
+      <li class="nav-item" data-view="rules"><span>⚙️</span> Detection Rules</li>
+      <li class="nav-item" data-view="reports"><span>📄</span> Reports</li>
+      <li class="nav-item" data-view="settings"><span>🔧</span> Settings</li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <p><span class="status-dot"></span> Status: ONLINE</p>
+      <p style="margin-top: 4px; color: var(--text-muted);">GitHub Pages Deployment</p>
+    </div>
+  </aside>
+
+  <!-- Main Stage -->
+  <main class="main-stage">
+    <header class="header-bar">
+      <div class="header-title">
+        <h1 id="view-title">Security Operations Overview</h1>
+        <p id="view-subtitle">Real-time telemetry and active threat metrics</p>
+      </div>
+      <div>
+        <button class="btn btn-primary" onclick="exportReport('json')">Export Report 📥</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- View: Overview -->
+      <section id="view-overview" class="view-section">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Network Events</div>
+            <div class="kpi-value">860</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Active Alerts</div>
+            <div class="kpi-value" style="color: var(--sev-high)">128</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">High/Critical</div>
+            <div class="kpi-value" style="color: var(--sev-critical)">15</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">C2 Beacons</div>
+            <div class="kpi-value" style="color: var(--sev-high)">98</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Unique Dsts</div>
+            <div class="kpi-value">6</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">DNS Queries</div>
+            <div class="kpi-value">163</div>
+          </div>
+        </div>
+
+        <div class="grid-2col" style="margin-top: 1.5rem;">
+          <div class="card">
+            <div class="card-title">Network Event Activity Timeline</div>
+            <div style="height: 250px; position: relative;">
+              <canvas id="chart-timeline"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Alert Severity Breakdown</div>
+            <div style="height: 250px; position: relative;">
+              <canvas id="chart-severity"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-title">🚨 Recent High-Risk Alerts</div>
+          <table class="soc-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Alert Type</th>
+                <th>Source IP</th>
+                <th>Destination</th>
+                <th>Severity</th>
+                <th>Risk Score</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2026-09-07 15:52:12</td>
+                <td>BEACONING</td>
+                <td>192.168.1.100</td>
+                <td>10.0.0.99:8443</td>
+                <td><span class="badge badge-critical">CRITICAL</span></td>
+                <td>100</td>
+                <td><button class="btn" onclick="openAlertDrawer('97177280-8a9c-4c28-945a-a10232972a46')">Inspect 🔍</button></td>
+              </tr>
+              <tr>
+                <td>2026-09-07 15:45:00</td>
+                <td>RARE_DESTINATION</td>
+                <td>192.168.1.12</td>
+                <td>192.168.99.99:4444</td>
+                <td><span class="badge badge-high">HIGH</span></td>
+                <td>75</td>
+                <td><button class="btn" onclick="openAlertDrawer('4fafa33d-6afe-4115-baf0-06d115fc752d')">Inspect 🔍</button></td>
+              </tr>
+              <tr>
+                <td>2026-09-07 15:30:00</td>
+                <td>DNS_ANOMALY</td>
+                <td>192.168.1.100</td>
+                <td>10.0.0.1:53</td>
+                <td><span class="badge badge-high">HIGH</span></td>
+                <td>80</td>
+                <td><button class="btn" onclick="openAlertDrawer('dns-tunnel-001')">Inspect 🔍</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- View: Network Traffic -->
+      <section id="view-traffic" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">🌐 Raw Network Flow Telemetry</div>
+          <table class="soc-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Source IP</th>
+                <th>Src Port</th>
+                <th>Destination IP</th>
+                <th>Dst Port</th>
+                <th>Proto</th>
+                <th>State</th>
+                <th>Log Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>2026-09-07 15:52:12</td><td>192.168.1.100</td><td>52030</td><td>10.0.0.99</td><td>8443</td><td>tcp</td><td>SF</td><td>conn</td></tr>
+              <tr><td>2026-09-07 15:51:42</td><td>192.168.1.100</td><td>52029</td><td>10.0.0.99</td><td>8443</td><td>tcp</td><td>SF</td><td>conn</td></tr>
+              <tr><td>2026-09-07 15:51:12</td><td>192.168.1.100</td><td>52028</td><td>10.0.0.99</td><td>8443</td><td>tcp</td><td>SF</td><td>conn</td></tr>
+              <tr><td>2026-09-07 15:50:42</td><td>192.168.1.100</td><td>52027</td><td>10.0.0.99</td><td>8443</td><td>tcp</td><td>SF</td><td>conn</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- View: Alerts -->
+      <section id="view-alerts" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">🚨 Active Security Alerts</div>
+          <table class="soc-table">
+            <thead>
+              <tr>
+                <th>Alert ID</th>
+                <th>Type</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th>Severity</th>
+                <th>Score</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>97177280</td>
+                <td>BEACONING</td>
+                <td>192.168.1.100</td>
+                <td>10.0.0.99:8443</td>
+                <td><span class="badge badge-critical">CRITICAL</span></td>
+                <td>100</td>
+                <td>NEW</td>
+                <td><button class="btn" onclick="openAlertDrawer('97177280-8a9c-4c28-945a-a10232972a46')">Inspect 🔍</button></td>
+              </tr>
+              <tr>
+                <td>4fafa33d</td>
+                <td>RARE_DESTINATION</td>
+                <td>192.168.1.12</td>
+                <td>192.168.99.99:4444</td>
+                <td><span class="badge badge-high">HIGH</span></td>
+                <td>75</td>
+                <td>INVESTIGATING</td>
+                <td><button class="btn" onclick="openAlertDrawer('4fafa33d-6afe-4115-baf0-06d115fc752d')">Inspect 🔍</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- View: C2 Detection -->
+      <section id="view-c2" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">📡 C2 Beaconing Candidates</div>
+          <table class="soc-table">
+            <thead>
+              <tr>
+                <th>Source IP</th>
+                <th>Destination IP</th>
+                <th>Port</th>
+                <th>Conns</th>
+                <th>Avg Interval</th>
+                <th>Stdev</th>
+                <th>CV</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>192.168.1.100</td>
+                <td>10.0.0.99</td>
+                <td>8443</td>
+                <td>30</td>
+                <td>30.01s</td>
+                <td>0.38s</td>
+                <td>0.0125</td>
+                <td><span class="badge badge-critical">100</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-title">📈 Interval Regularity Pulse</div>
+          <div style="height: 250px; position: relative;">
+            <canvas id="chart-c2-pulse"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: DNS Analysis -->
+      <section id="view-dns" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">🔍 DNS Anomaly Telemetry</div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+            ℹ️ Disclaimer: These indicators contribute to investigation risk. They do not, individually or combined, constitute proof of malicious activity.
+          </p>
+          <table class="soc-table">
+            <thead>
+              <tr>
+                <th>Source IP</th>
+                <th>Domain Query</th>
+                <th>Indicator Type</th>
+                <th>Risk Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>192.168.1.100</td>
+                <td>encoded-c2-stage2-exfil-payload.malicious-sim.org</td>
+                <td>Long Domain (>50 chars)</td>
+                <td><span class="badge badge-high">75</span></td>
+              </tr>
+              <tr>
+                <td>192.168.1.100</td>
+                <td>chunk0.exfiltration-tunnel.test.org</td>
+                <td>Excessive Subdomains (8 labels)</td>
+                <td><span class="badge badge-high">80</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- View: Evidence -->
+      <section id="view-evidence" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">📁 Evidence Locker</div>
+          <table class="soc-table">
+            <thead>
+              <tr>
+                <th>Filename</th>
+                <th>Type</th>
+                <th>Size</th>
+                <th>Directory</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>sample_c2_beacon.pcap</td><td>Raw PCAP</td><td>1.2 MB</td><td>data/raw</td></tr>
+              <tr><td>conn.log</td><td>Zeek Log</td><td>340 KB</td><td>data/zeek/sample_batch</td></tr>
+              <tr><td>report_20260907.json</td><td>JSON Evidence</td><td>12 KB</td><td>data/alerts</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- View: Rules -->
+      <section id="view-rules" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">⚙️ Detection Rules Engine</div>
+          <table class="soc-table">
+            <thead>
+              <tr>
+                <th>Rule ID</th>
+                <th>Rule Name</th>
+                <th>Status</th>
+                <th>Severity</th>
+                <th>Threshold</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>RULE_BEACON</td><td>C2 Beaconing Detector</td><td><span class="badge badge-safe">ENABLED</span></td><td>HIGH</td><td>0.15 (CV)</td></tr>
+              <tr><td>RULE_DNS_LONG</td><td>DNS Long Domain Detector</td><td><span class="badge badge-safe">ENABLED</span></td><td>MEDIUM</td><td>50 chars</td></tr>
+              <tr><td>RULE_RARE_DEST</td><td>Rare Destination Detector</td><td><span class="badge badge-safe">ENABLED</span></td><td>MEDIUM</td><td>0.05 pct</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- View: Reports -->
+      <section id="view-reports" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">📄 Export Reports</div>
+          <p style="color: var(--text-secondary); margin-bottom: 1rem;">Generate executive SOC threat reports in JSON and CSV formats.</p>
+          <div style="display: flex; gap: 1rem;">
+            <button class="btn btn-primary" onclick="exportReport('json')">Download JSON Report 📥</button>
+            <button class="btn" onclick="exportReport('csv')">Download CSV Export 📊</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: Settings -->
+      <section id="view-settings" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">🔧 Operational Configuration</div>
+          <pre style="background-color: var(--bg-canvas); padding: 1rem; border-radius: 4px; font-family: 'JetBrains Mono'; font-size: 0.8rem;">
+application:
+  db_path: "data/netwatch.db"
+  log_level: "INFO"
+  analysis_window_hours: 24
+          </pre>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Alert Inspection Drawer Modal -->
+  <div id="drawer-overlay" class="drawer-overlay">
+    <div class="drawer-content">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.1rem;">Alert Forensic Inspector</h2>
+        <button id="close-drawer" class="btn">✕ Close</button>
+      </div>
+      <div>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">Alert ID</p>
+        <p id="drawer-alert-id" style="font-family: 'JetBrains Mono'; font-size: 0.9rem; font-weight: 700;"></p>
+      </div>
+      <div style="display: flex; gap: 1.5rem;">
+        <div>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Type</p>
+          <p id="drawer-type" style="font-weight: 600;"></p>
+        </div>
+        <div>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Severity</p>
+          <div id="drawer-sev"></div>
+        </div>
+        <div>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Risk Score</p>
+          <p id="drawer-score" style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--sev-critical);"></p>
+        </div>
+      </div>
+      <div>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">Flow Pair</p>
+        <p id="drawer-source" style="font-family: 'JetBrains Mono';"></p>
+      </div>
+      <div>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">Summary Reason</p>
+        <p id="drawer-reason" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;"></p>
+      </div>
+      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
+        <p style="font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem;">🛡️ Relevant ATT&CK Context</p>
+        <p style="font-size: 0.75rem; color: var(--text-secondary);">- <strong>T1071 — Application Layer Protocol</strong></p>
+        <p style="font-size: 0.7rem; color: var(--text-muted); padding-left: 0.75rem;">Technique potentially relevant to investigation — behavioral detection alone does not confirm this technique was used.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
