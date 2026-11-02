@@ -1,0 +1,23 @@
+BEACONING:
+  - technique_id: "T1071"
+    name: "Application Layer Protocol"
+    note: "Technique potentially relevant to investigation."
+  - technique_id: "T1568"
+    name: "Dynamic Resolution"
+    note: "Technique potentially relevant to investigation."
+DNS_ANOMALY:
+  - technique_id: "T1071.004"
+    name: "DNS"
+    note: "Technique potentially relevant to investigation."
+RARE_DESTINATION:
+  - technique_id: "T1071"
+    name: "Application Layer Protocol"
+    note: "Technique potentially relevant to investigation."
+HIGH_FREQUENCY:
+  - technique_id: "T1499"
+    name: "Endpoint Denial of Service"
+    note: "Technique potentially relevant to investigation."
+SUSPICIOUS_PORT:
+  - technique_id: "T1571"
+    name: "Non-Standard Port"
+    note: "Technique potentially relevant to investigation."

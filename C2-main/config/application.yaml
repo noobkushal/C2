@@ -1,0 +1,6 @@
+application:
+  db_path: "data/netwatch.db"
+  log_level: "INFO"
+  log_file: "data/processed/netwatch.log"
+  capture_interface_default: "eth0"
+  analysis_window_hours: 24

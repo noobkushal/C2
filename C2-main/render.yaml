@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: netsentry-soc
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run dashboard/app.py --server.address 0.0.0.0 --server.port $PORT --server.headless true
+    healthCheckPath: /_stcore/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: NETSENTRY_CLOUD_DEPLOYMENT
+        value: "true"
+      - key: NETSENTRY_ADMIN_PASSWORD
+        sync: false
+      - key: NETSENTRY_ANALYST_PASSWORD
+        sync: false
