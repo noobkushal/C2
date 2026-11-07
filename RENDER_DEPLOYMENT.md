@@ -1,55 +1,50 @@
-# NetSentry SOC — Render deployment
+# NetWatch SOC — Cloud Deployment & Service Guide
 
-## Render service settings
+## Overview
 
-This repository is a Streamlit application (not a FastAPI service). Deploy it as a
-**Render Web Service** using the included `render.yaml` Blueprint:
+This repository provides two deployment targets:
+1. **GitHub Pages WebApp (Client-Side)**: [https://noobkushal.github.io/C2/](https://noobkushal.github.io/C2/)
+2. **Render Python Cloud Service**: Host the native Streamlit + SQLite SOC dashboard on Render Free tier.
+3. **Localhost Application**: [http://localhost:8501/](http://localhost:8501/) (Run via `run_localhost.bat`).
 
-- Runtime: Python
-- Build command: `pip install -r requirements.txt`
-- Start command: `streamlit run dashboard/app.py --server.address 0.0.0.0 --server.port $PORT --server.headless true`
-- Health check: `/_stcore/health`
-- Plan: Free
+---
 
-If configuring manually, use the values above and set the repository root directory
-to the folder containing this file.
+## Render Service Settings
 
-## Required secrets
+Deploy as a **Render Web Service** using the included `render.yaml` Blueprint or manual configuration:
 
-In Render → Environment, set:
+- **Repository**: [https://github.com/noobkushal/C2](https://github.com/noobkushal/C2)
+- **Runtime**: Python
+- **Build command**: `pip install -r requirements.txt`
+- **Start command**: `streamlit run dashboard/app.py --server.address 0.0.0.0 --server.port $PORT --server.headless true`
+- **Health check path**: `/_stcore/health`
+- **Plan**: Free
 
-- `NETSENTRY_CLOUD_DEPLOYMENT=true`: enables cloud-safe account seeding (set automatically by the Blueprint).\n- `NETSENTRY_ADMIN_PASSWORD`: a unique, strong password for the `admin` account.
-- `NETSENTRY_ANALYST_PASSWORD`: optional; if set, creates the `analyst` account.
+---
 
-The app seeds these accounts only when its users table is empty. If you change a
-password after the first deployment, changing the environment variable alone does
-not update the existing database record. On the current ephemeral SQLite deployment,
-a fresh instance may reseed it, but do not rely on that for durable identity storage.
+## Required Environment Secrets
 
-Never commit real passwords, tokens, or database URLs to GitHub.
+In Render → Service → Environment, set:
 
-## Important limitations of this first cloud deployment
+- `NETSENTRY_CLOUD_DEPLOYMENT=true`: Enables cloud-safe account seeding (set automatically by the Blueprint).
+- `NETSENTRY_ADMIN_PASSWORD`: A unique, strong password for the `admin` account.
+- `NETSENTRY_ANALYST_PASSWORD`: (Optional) Password for the `analyst` account.
 
-- This is the existing Streamlit + SQLite application. It is **not yet** the planned
-  FastAPI + Neon PostgreSQL architecture.
-- Render Free services can sleep when idle, and the local SQLite database is on
-  ephemeral storage. Data can be lost when the service restarts, redeploys, or its
-  instance is replaced. Treat this as a demonstration deployment only.
-- Do not upload sensitive PCAPs, production logs, personal data, or confidential
-  incident evidence.
-- A Render web service cannot capture packets from your laptop's Wi-Fi/Ethernet
-  adapter. Use the local sensor for authorized capture, then upload sanitized
-  PCAP/Zeek data for analysis where supported.
-- Scapy live sniffing and privileged NIC capture are not available as a reliable
-  always-on capability on the Render Free web service.
-- The current password hashing implementation is salted SHA-256 and should be
-  upgraded to a dedicated password-hashing algorithm before any real users or
-  sensitive data are allowed. Do not treat this demo deployment as production SOC.
+The app seeds these accounts only when its users table is empty. Never commit real passwords, tokens, or database URLs to GitHub.
 
-## Deploy
+---
 
-1. Push the updated files to the GitHub repository.
-2. In Render, choose **New → Blueprint** and select this repository, or create a
-   Web Service manually using the settings above.
-3. Enter the required environment secrets when prompted.
-4. Deploy and open the generated `onrender.com` URL.
+## Architecture Boundaries on Cloud Hosting
+
+- **Cloud Packet Capture Limitations**: A cloud service on Render runs inside a container and cannot sniff packets from your physical laptop's Wi-Fi or Ethernet card.
+- **Hardware Sniffing**: Use the local sensor (`setup_live_sniffer.bat` or `start_soc.bat`) for physical NIC capture on Windows, then upload sanitized PCAP files for cloud analysis.
+- **Client-Side Alternative**: Use the [GitHub Pages WebApp](https://noobkushal.github.io/C2/) for instant in-browser Wireshark PCAP analysis, C2 regularity detection, and report generation with zero installations.
+
+---
+
+## Deployment Steps
+
+1. Push your updated files to the GitHub repository: `https://github.com/noobkushal/C2`.
+2. In Render, select **New → Blueprint** and link the `noobkushal/C2` repository.
+3. Supply the required environment passwords when prompted.
+4. Click **Apply** to deploy the service.

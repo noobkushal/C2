@@ -94,7 +94,10 @@
         <p><span id="live-indicator" class="status-dot"></span> Status: <strong id="status-text">ONLINE</strong></p>
         <span id="clock-display" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">00:00:00 UTC</span>
       </div>
-      <p style="color: var(--text-muted); font-size: 0.7rem;">Deploy: GitHub Pages / Standalone</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.4rem; padding-top:0.4rem; border-top:1px solid var(--border-subtle); font-size: 0.72rem;">
+        <a href="https://noobkushal.github.io/C2/" target="_blank" style="color:var(--accent-cyan); text-decoration:none; font-weight:600;">🌐 Live WebApp</a>
+        <a href="https://github.com/noobkushal/C2" target="_blank" style="color:var(--accent-blue); text-decoration:none; font-weight:600;">🐙 GitHub Repo</a>
+      </div>
     </div>
   </aside>
 
@@ -115,6 +118,10 @@
           <span class="quick-search-icon">🔍</span>
           <input type="search" id="global-search-input" placeholder="Quick Search (Press / to focus)..." autocomplete="off">
         </div>
+
+        <!-- Links to GitHub & Live WebApp -->
+        <a href="https://noobkushal.github.io/C2/" target="_blank" class="btn btn-sm" title="Live GitHub Pages WebApp" style="text-decoration:none;">🌐 WebApp</a>
+        <a href="https://github.com/noobkushal/C2" target="_blank" class="btn btn-sm" title="GitHub Repository" style="text-decoration:none;">🐙 GitHub</a>
 
         <!-- Theme Quick Switch -->
         <select id="theme-selector" style="padding: 0.38rem 0.6rem; font-size: 0.78rem;">
