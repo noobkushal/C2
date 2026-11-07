@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NetWatch SOC — Network Traffic & Real-Time C2 Detection Lab</title>
+  <title>NetWatch SOC — Real-Time Network Traffic & C2 Detection Platform</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -13,481 +13,1071 @@
   <aside class="sidebar">
     <div class="brand">
       <span class="brand-icon">🛡️</span>
-      <span>NetWatch SOC</span>
+      <div>
+        <div class="brand-title">NetWatch SOC</div>
+        <div class="brand-sub">Platform v2.5</div>
+      </div>
     </div>
 
-    <ul class="nav-list">
-      <li class="nav-item active" data-view="overview"><span>📊</span> Overview</li>
-      <li class="nav-item" data-view="realtime"><span>⚡</span> Real-Time Monitor</li>
-      <li class="nav-item" data-view="pcap"><span>🔬</span> PCAP Packet Analyzer</li>
-      <li class="nav-item" data-view="traffic"><span>🌐</span> Network Traffic</li>
-      <li class="nav-item" data-view="alerts"><span>🚨</span> Alerts & Triage</li>
-      <li class="nav-item" data-view="c2"><span>📡</span> C2 Detection</li>
-      <li class="nav-item" data-view="dns"><span>🔍</span> DNS Analysis</li>
-      <li class="nav-item" data-view="evidence"><span>📁</span> Evidence Locker</li>
-      <li class="nav-item" data-view="rules"><span>⚙️</span> Detection Rules</li>
-      <li class="nav-item" data-view="reports"><span>📄</span> Reports</li>
-      <li class="nav-item" data-view="settings"><span>🔧</span> System & Setup Guide</li>
-    </ul>
+    <div class="sidebar-scroll">
+      <!-- OPERATIONS -->
+      <div class="nav-group-title">Operations</div>
+      <ul class="nav-list">
+        <li class="nav-item active" data-view="overview">
+          <div class="nav-item-content"><span>📊</span> Overview</div>
+        </li>
+        <li class="nav-item" data-view="realtime">
+          <div class="nav-item-content"><span>⚡</span> Real-Time Monitor</div>
+          <span id="nav-sniff-dot" class="status-dot" style="display:none; margin:0;"></span>
+        </li>
+        <li class="nav-item" data-view="traffic">
+          <div class="nav-item-content"><span>🌐</span> Network Traffic</div>
+        </li>
+        <li class="nav-item" data-view="pcap">
+          <div class="nav-item-content"><span>🔬</span> PCAP Analyzer</div>
+        </li>
+      </ul>
+
+      <!-- DETECTION & THREATS -->
+      <div class="nav-group-title">Detection & Threats</div>
+      <ul class="nav-list">
+        <li class="nav-item" data-view="alerts">
+          <div class="nav-item-content"><span>🚨</span> Alerts & Triage</div>
+          <span id="nav-alert-badge" class="nav-pill">3</span>
+        </li>
+        <li class="nav-item" data-view="c2">
+          <div class="nav-item-content"><span>📡</span> C2 Beacon Detection</div>
+        </li>
+        <li class="nav-item" data-view="dns">
+          <div class="nav-item-content"><span>🔍</span> DNS Analysis</div>
+        </li>
+        <li class="nav-item" data-view="mitre">
+          <div class="nav-item-content"><span>⚔️</span> MITRE ATT&CK</div>
+        </li>
+        <li class="nav-item" data-view="rules">
+          <div class="nav-item-content"><span>⚙️</span> Detection Rules</div>
+        </li>
+      </ul>
+
+      <!-- INVESTIGATION & INTEL -->
+      <div class="nav-group-title">Investigation & Intel</div>
+      <ul class="nav-list">
+        <li class="nav-item" data-view="ipintel">
+          <div class="nav-item-content"><span>🎯</span> IP Threat Intel</div>
+        </li>
+        <li class="nav-item" data-view="cases">
+          <div class="nav-item-content"><span>📁</span> Incident Cases</div>
+          <span id="nav-case-badge" class="badge badge-low" style="font-size:0.65rem;">2</span>
+        </li>
+        <li class="nav-item" data-view="evidence">
+          <div class="nav-item-content"><span>🗂️</span> Evidence Locker</div>
+        </li>
+        <li class="nav-item" data-view="search">
+          <div class="nav-item-content"><span>🔎</span> Threat Hunter</div>
+        </li>
+      </ul>
+
+      <!-- PLATFORM -->
+      <div class="nav-group-title">Platform</div>
+      <ul class="nav-list">
+        <li class="nav-item" data-view="reports">
+          <div class="nav-item-content"><span>📄</span> Reports</div>
+        </li>
+        <li class="nav-item" data-view="settings">
+          <div class="nav-item-content"><span>🔧</span> System Settings</div>
+        </li>
+      </ul>
+    </div>
 
     <div class="sidebar-footer">
-      <p><span id="live-indicator" class="status-dot"></span> Status: <span id="status-text">ONLINE</span></p>
-      <p style="margin-top: 4px; color: var(--text-muted);">GitHub Pages Deployment</p>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+        <p><span id="live-indicator" class="status-dot"></span> Status: <strong id="status-text">ONLINE</strong></p>
+        <span id="clock-display" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">00:00:00 UTC</span>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.7rem;">Deploy: GitHub Pages / Standalone</p>
     </div>
   </aside>
 
   <!-- Main Stage -->
   <main class="main-stage">
+    <!-- Header Bar -->
     <header class="header-bar">
-      <div class="header-title">
-        <h1 id="view-title">Security Operations Overview</h1>
-        <p id="view-subtitle">Real-time telemetry and active threat metrics</p>
+      <div class="header-left">
+        <div class="header-title">
+          <h1 id="view-title">Security Operations Overview</h1>
+          <p id="view-subtitle">Real-time network telemetry, behavioral detection, and C2 intelligence</p>
+        </div>
       </div>
-      <div style="display: flex; gap: 0.75rem; align-items: center;">
-        <span id="user-badge" style="font-size: 0.85rem; color: var(--text-secondary);">👤 Logged in as: <strong id="user-name">admin</strong> (<span id="user-role" class="badge badge-critical">ADMIN</span>)</span>
-        <button id="login-btn" class="btn" onclick="openLoginModal()">Login 🔑</button>
-        <button id="admin-perm-btn" class="btn" onclick="toggleAdminConsent()">Admin Consent: REVOKED 🔒</button>
-        <button class="btn btn-primary" onclick="exportReport('json')">Export Report 📥</button>
+
+      <div class="header-actions">
+        <!-- Quick Global Search -->
+        <div class="quick-search">
+          <span class="quick-search-icon">🔍</span>
+          <input type="search" id="global-search-input" placeholder="Quick Search (Press / to focus)..." autocomplete="off">
+        </div>
+
+        <!-- Theme Quick Switch -->
+        <select id="theme-selector" style="padding: 0.38rem 0.6rem; font-size: 0.78rem;">
+          <option value="default">🌙 Dark SOC</option>
+          <option value="cyber">🌌 Cyber Midnight</option>
+          <option value="matrix">💻 Emerald Matrix</option>
+          <option value="contrast">⬛ High Contrast</option>
+        </select>
+
+        <!-- User Role Badge -->
+        <span id="user-badge" style="font-size: 0.8rem; color: var(--text-secondary); display:flex; align-items:center; gap:0.35rem;">
+          👤 <strong id="user-name">admin</strong>
+          <span id="user-role" class="badge badge-critical">ADMIN</span>
+        </span>
+
+        <button id="login-btn" class="btn btn-sm" onclick="openLoginModal()">Login 🔑</button>
+        <button id="admin-perm-btn" class="btn btn-sm" onclick="toggleAdminConsent()">Consent: REVOKED 🔒</button>
+        <button class="btn btn-sm btn-primary" onclick="quickExport()">Export 📥</button>
       </div>
     </header>
 
+    <!-- Page Content Container -->
     <div class="page-content">
 
-      <!-- View: Overview -->
+      <!-- ========================================== -->
+      <!-- VIEW: OVERVIEW -->
+      <!-- ========================================== -->
       <section id="view-overview" class="view-section">
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Network Events</div>
-            <div class="kpi-value" id="kpi-net-events">860</div>
+        <!-- Quick Action Bar -->
+        <div class="toolbar" style="justify-content: space-between;">
+          <div style="display:flex; gap:0.5rem; align-items:center;">
+            <span style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">⚡ SOC Operations Center:</span>
+            <button class="btn btn-sm" onclick="seedSampleBatch()">➕ Inject Telemetry Batch</button>
+            <button class="btn btn-sm" onclick="switchView('c2')">📡 Run C2 Sweep</button>
+            <button class="btn btn-sm" onclick="switchView('alerts')">🚨 Review Active Triage</button>
           </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Active Alerts</div>
-            <div class="kpi-value" id="kpi-alerts" style="color: var(--sev-high)">128</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">High/Critical</div>
-            <div class="kpi-value" style="color: var(--sev-critical)">15</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">C2 Beacons</div>
-            <div class="kpi-value" style="color: var(--sev-high)">98</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Unique Dsts</div>
-            <div class="kpi-value">6</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">DNS Queries</div>
-            <div class="kpi-value">163</div>
+          <div>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Sensor: <strong style="color:var(--sev-safe);">Active Scapy / PCAP Ingestion Engine</strong></span>
           </div>
         </div>
 
-        <div class="grid-2col" style="margin-top: 1.5rem;">
+        <!-- KPI Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-label">Network Events</span><span class="kpi-icon">🌐</span></div>
+            <div class="kpi-value" id="kpi-net-events">1,420</div>
+            <div class="kpi-sub"><span style="color:var(--sev-safe);">▲ +12%</span> vs last hour</div>
+          </div>
+          <div class="kpi-card kpi-high">
+            <div class="kpi-header"><span class="kpi-label">Active Alerts</span><span class="kpi-icon">🚨</span></div>
+            <div class="kpi-value" id="kpi-alerts" style="color: var(--sev-high)">3</div>
+            <div class="kpi-sub">Requiring SOC analyst triage</div>
+          </div>
+          <div class="kpi-card kpi-critical">
+            <div class="kpi-header"><span class="kpi-label">Critical Threats</span><span class="kpi-icon">🔥</span></div>
+            <div class="kpi-value" id="kpi-critical" style="color: var(--sev-critical)">1</div>
+            <div class="kpi-sub">C2 Beacon (10.0.0.99:8443)</div>
+          </div>
+          <div class="kpi-card kpi-high">
+            <div class="kpi-header"><span class="kpi-label">C2 Candidates</span><span class="kpi-icon">📡</span></div>
+            <div class="kpi-value" id="kpi-c2-beacons" style="color: var(--sev-high)">2</div>
+            <div class="kpi-sub">Regular periodic callbacks</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-label">Monitored Dsts</span><span class="kpi-icon">🎯</span></div>
+            <div class="kpi-value" id="kpi-unique-dsts">8</div>
+            <div class="kpi-sub">Unique endpoint flows</div>
+          </div>
+          <div class="kpi-card kpi-purple">
+            <div class="kpi-header"><span class="kpi-label">DNS Queries</span><span class="kpi-icon">🔍</span></div>
+            <div class="kpi-value" id="kpi-dns-queries">284</div>
+            <div class="kpi-sub">2 Tunneling anomalies</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-label">Incident Cases</span><span class="kpi-icon">📁</span></div>
+            <div class="kpi-value" id="kpi-cases">2</div>
+            <div class="kpi-sub">1 Under Investigation</div>
+          </div>
+          <div class="kpi-card kpi-safe">
+            <div class="kpi-header"><span class="kpi-label">Detection Rules</span><span class="kpi-icon">⚙️</span></div>
+            <div class="kpi-value" id="kpi-rules" style="color:var(--sev-safe);">5 / 5</div>
+            <div class="kpi-sub">100% Rules Active</div>
+          </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="grid-2col">
           <div class="card">
-            <div class="card-title">Network Event Activity Timeline</div>
+            <div class="card-title">
+              <span>📈 Network Flow Activity Timeline</span>
+              <div class="card-title-actions">
+                <button class="btn btn-sm" onclick="setTimelineRange('1h')">1h</button>
+                <button class="btn btn-sm btn-primary" onclick="setTimelineRange('6h')">6h</button>
+                <button class="btn btn-sm" onclick="setTimelineRange('24h')">24h</button>
+              </div>
+            </div>
             <div style="height: 250px; position: relative;">
               <canvas id="chart-timeline"></canvas>
             </div>
           </div>
           <div class="card">
-            <div class="card-title">Alert Severity Breakdown</div>
+            <div class="card-title">🚨 Threat Severity Distribution</div>
             <div style="height: 250px; position: relative;">
               <canvas id="chart-severity"></canvas>
             </div>
           </div>
         </div>
 
-        <div class="card" style="margin-top: 1.5rem;">
-          <div class="card-title">🚨 Recent High-Risk Alerts</div>
-          <table class="soc-table">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Alert Type</th>
-                <th>Source IP</th>
-                <th>Destination</th>
-                <th>Severity</th>
-                <th>Risk Score</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="overview-alerts-tbody">
-              <tr>
-                <td>2026-09-07 15:52:12</td>
-                <td>BEACONING</td>
-                <td>192.168.1.100</td>
-                <td>10.0.0.99:8443</td>
-                <td><span class="badge badge-critical">CRITICAL</span></td>
-                <td>100</td>
-                <td><button class="btn" onclick="openAlertDrawer('97177280-8a9c-4c28-945a-a10232972a46')">Inspect 🔍</button></td>
-              </tr>
-              <tr>
-                <td>2026-09-07 15:45:00</td>
-                <td>RARE_DESTINATION</td>
-                <td>192.168.1.12</td>
-                <td>192.168.99.99:4444</td>
-                <td><span class="badge badge-high">HIGH</span></td>
-                <td>75</td>
-                <td><button class="btn" onclick="openAlertDrawer('4fafa33d-6afe-4115-baf0-06d115fc752d')">Inspect 🔍</button></td>
-              </tr>
-              <tr>
-                <td>2026-09-07 15:30:00</td>
-                <td>DNS_ANOMALY</td>
-                <td>192.168.1.100</td>
-                <td>10.0.0.1:53</td>
-                <td><span class="badge badge-high">HIGH</span></td>
-                <td>80</td>
-                <td><button class="btn" onclick="openAlertDrawer('dns-tunnel-001')">Inspect 🔍</button></td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Charts Row 2 -->
+        <div class="grid-equal">
+          <div class="card">
+            <div class="card-title">📊 Protocol Distribution</div>
+            <div style="height: 220px; position: relative;">
+              <canvas id="chart-protocol"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">🎯 Top Target Destinations & Risk Rating</div>
+            <div style="height: 220px; position: relative;">
+              <canvas id="chart-top-talkers"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overview Alerts Table -->
+        <div class="card">
+          <div class="card-title">
+            <span>🚨 Priority Triage Queue (Action Required)</span>
+            <button class="btn btn-sm" onclick="switchView('alerts')">View Full Queue ➔</button>
+          </div>
+          <div class="table-responsive">
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Alert Type</th>
+                  <th>Source IP</th>
+                  <th>Destination Flow</th>
+                  <th>Severity</th>
+                  <th>Risk Score</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="overview-alerts-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <!-- View: Real-Time Monitor -->
+      <!-- ========================================== -->
+      <!-- VIEW: REAL-TIME MONITOR -->
+      <!-- ========================================== -->
       <section id="view-realtime" class="view-section hidden">
-        <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card">
           <div class="card-title">
-            <span>🛡️ Admin Permission & Real-World Network Interface Scanner</span>
+            <span>🛡️ Admin Permission & Real-World Network Interface Sniffer</span>
             <span id="perm-badge" class="badge badge-critical">PERMISSION: REVOKED</span>
           </div>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
-            Real-world live network scanning requires active user login with <strong>ADMIN</strong> role and explicit Admin Consent confirmation.
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            Real-world packet sniffing interfaces with host physical network adapters (`Wi-Fi`, `Ethernet`, `eth0`). Requires logged-in <strong>ADMIN</strong> role and explicit Admin Consent confirmation.
           </p>
-          <div style="display: flex; gap: 1rem; align-items: center;">
-            <button id="grant-btn" class="btn btn-primary" onclick="grantConsent()">Grant Admin Consent 🔓</button>
-            <button id="revoke-btn" class="btn" onclick="revokeConsent()" style="display:none;">Revoke Consent ⛔</button>
-            <button id="sniff-toggle-btn" class="btn" onclick="toggleSniffing()" disabled>Start Live Packet Sniffing ▶</button>
+
+          <div class="toolbar" style="margin-bottom: 0;">
+            <div class="toolbar-group">
+              <span class="toolbar-label">Adapter:</span>
+              <select id="realtime-interface-select">
+                <option value="wifi">Wi-Fi (Intel Wi-Fi 6 AX201)</option>
+                <option value="ethernet">Ethernet (Realtek PCIe GbE)</option>
+                <option value="loopback">Loopback (127.0.0.1)</option>
+                <option value="all">All Interfaces (Promiscuous)</option>
+              </select>
+            </div>
+
+            <div class="toolbar-group">
+              <span class="toolbar-label">Filter (BPF):</span>
+              <input type="text" id="realtime-filter-input" placeholder="e.g. tcp port 8443 or port 53" style="width: 220px;">
+            </div>
+
+            <div class="toolbar-group">
+              <span class="toolbar-label">Speed:</span>
+              <select id="realtime-speed-select">
+                <option value="1500">Normal (1.5s)</option>
+                <option value="500">Fast (500ms)</option>
+                <option value="3000">Slow (3.0s)</option>
+              </select>
+            </div>
+
+            <div style="display:flex; gap:0.5rem; margin-left:auto;">
+              <button id="grant-btn" class="btn btn-primary" onclick="grantConsent()">Grant Consent 🔓</button>
+              <button id="revoke-btn" class="btn" onclick="revokeConsent()" style="display:none;">Revoke Consent ⛔</button>
+              <button id="sniff-toggle-btn" class="btn" onclick="toggleSniffing()" disabled>Start Sniffing ▶</button>
+              <button class="btn" onclick="clearLivePackets()">Clear Buffer 🗑️</button>
+              <button class="btn" onclick="exportLiveStream()">Export Capture 📥</button>
+            </div>
           </div>
+        </div>
+
+        <!-- Live Sniffing Metrics Bar -->
+        <div style="display: flex; gap: 1rem; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 0.75rem 1.25rem; border-radius: var(--radius-sm); font-size: 0.8rem;">
+          <div>Packets Captured: <strong id="live-packet-counter" style="font-family: var(--font-mono); color: var(--accent-cyan);">0</strong></div>
+          <div style="color: var(--border-strong);">|</div>
+          <div>Capture Rate: <strong id="live-packet-rate" style="font-family: var(--font-mono); color: var(--sev-safe);">0.0 pkt/s</strong></div>
+          <div style="color: var(--border-strong);">|</div>
+          <div>Anomalies Flagged: <strong id="live-anomaly-counter" style="font-family: var(--font-mono); color: var(--sev-critical);">0</strong></div>
+          <div style="color: var(--border-strong);">|</div>
+          <div>Active Filter: <span id="live-filter-display" style="font-family: var(--font-mono); color: var(--text-secondary);">None</span></div>
         </div>
 
         <div class="grid-equal">
           <div class="card">
-            <div class="card-title">⚡ Live Captured Packets Stream</div>
+            <div class="card-title">
+              <span>⚡ Live Captured Packets Stream</span>
+              <span id="live-stream-badge" class="badge badge-neutral">PAUSED</span>
+            </div>
+            <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+              <table class="soc-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Source IP:Port</th>
+                    <th>Destination IP:Port</th>
+                    <th>Proto</th>
+                    <th>Flags</th>
+                    <th>Inspect</th>
+                  </tr>
+                </thead>
+                <tbody id="realtime-packets-tbody">
+                  <tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 2rem;">Live packet stream idle. Grant admin consent and click 'Start Sniffing'.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span>🔥 Real-Time Raised Issues & Anomalies</span>
+              <span class="badge badge-critical" id="realtime-alerts-count">0 Detected</span>
+            </div>
+            <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+              <table class="soc-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Issue Type</th>
+                    <th>Flow Vector</th>
+                    <th>Severity</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="realtime-alerts-tbody">
+                  <tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 2rem;">No real-time issues raised yet. Packets are evaluated against active rules.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: NETWORK TRAFFIC -->
+      <!-- ========================================== -->
+      <section id="view-traffic" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">
+            <span>🌐 Network Flow Telemetry & Session Log</span>
+            <div class="card-title-actions">
+              <button class="btn btn-sm btn-primary" onclick="openAddFlowModal()">➕ Inject Test Flow</button>
+              <button class="btn btn-sm" onclick="exportTrafficCSV()">Export CSV 📊</button>
+              <button class="btn btn-sm" onclick="renderTrafficTable()">Refresh 🔄</button>
+            </div>
+          </div>
+
+          <!-- Flow Filters Toolbar -->
+          <div class="toolbar">
+            <div class="toolbar-group">
+              <span class="toolbar-label">Search:</span>
+              <input type="text" id="traffic-search-input" placeholder="Filter by IP, Port, or Service..." style="width: 240px;">
+            </div>
+            <div class="toolbar-group">
+              <span class="toolbar-label">Protocol:</span>
+              <select id="traffic-proto-filter">
+                <option value="ALL">All Protocols</option>
+                <option value="TCP">TCP</option>
+                <option value="UDP">UDP</option>
+                <option value="DNS">DNS</option>
+                <option value="ICMP">ICMP</option>
+              </select>
+            </div>
+            <div class="toolbar-group">
+              <span class="toolbar-label">Conn State:</span>
+              <select id="traffic-state-filter">
+                <option value="ALL">All States</option>
+                <option value="SF">SF (Established & Closed)</option>
+                <option value="S0">S0 (SYN without Reply)</option>
+                <option value="REJ">REJ (Connection Rejected)</option>
+                <option value="RSTO">RSTO (Reset by Origin)</option>
+              </select>
+            </div>
+            <div class="toolbar-group">
+              <span class="toolbar-label">Flagged Only:</span>
+              <label class="switch">
+                <input type="checkbox" id="traffic-threat-toggle">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="table-responsive">
             <table class="soc-table">
               <thead>
                 <tr>
                   <th>Timestamp</th>
                   <th>Source IP</th>
-                  <th>Destination</th>
+                  <th>Src Port</th>
+                  <th>Destination IP</th>
+                  <th>Dst Port</th>
                   <th>Proto</th>
+                  <th>Duration</th>
+                  <th>Bytes Sent/Recv</th>
+                  <th>State</th>
+                  <th>Source</th>
+                  <th>Threat</th>
+                  <th>Action</th>
                 </tr>
               </thead>
-              <tbody id="realtime-packets-tbody">
-                <tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Live sniffing stopped. Grant permission to start stream.</td></tr>
-              </tbody>
+              <tbody id="traffic-tbody"></tbody>
             </table>
           </div>
 
-          <div class="card">
-            <div class="card-title">🔥 Real-Time Raised Issues & Alerts</div>
-            <table class="soc-table">
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>Issue Type</th>
-                  <th>Flow Pair</th>
-                  <th>Severity</th>
-                </tr>
-              </thead>
-              <tbody id="realtime-alerts-tbody">
-                <tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No live issues raised yet.</td></tr>
-              </tbody>
-            </table>
+          <!-- Pagination Bar -->
+          <div class="pagination-bar">
+            <div>Showing <span id="traffic-count-display">0</span> network flows</div>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+              <button class="btn btn-sm" onclick="changeTrafficPage(-1)">◀ Previous</button>
+              <span id="traffic-page-number" style="font-family:var(--font-mono); font-weight:700;">1 / 1</span>
+              <button class="btn btn-sm" onclick="changeTrafficPage(1)">Next ▶</button>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- View: PCAP Packet Analyzer -->
+      <!-- ========================================== -->
+      <!-- VIEW: PCAP PACKET ANALYZER -->
+      <!-- ========================================== -->
       <section id="view-pcap" class="view-section hidden">
-        <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card">
           <div class="card-title">
             <span>🔬 In-Browser Raw PCAP Binary Packet Analyzer (Wireshark Engine)</span>
             <span id="pcap-status-title" class="badge badge-safe">Ready for Capture Upload</span>
           </div>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1rem;">
             Upload any <strong>.pcap</strong> or <strong>.pcapng</strong> capture file directly in your browser. The embedded binary parser decodes Ethernet, IPv4, TCP/UDP headers, displays Wireshark-style protocol trees & hex inspection, and runs C2 threat detection.
           </p>
-          <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
             <input type="file" id="pcap-file-input" accept=".pcap,.pcapng,.cap" style="display: none;">
             <button class="btn btn-primary" onclick="document.getElementById('pcap-file-input').click()">📁 Select PCAP File to Analyze</button>
-            <button class="btn" onclick="loadDemoPcap()">🧪 Load Sample C2 Beacon PCAP</button>
+            <button class="btn" onclick="loadSamplePcap('c2')">🧪 Load Sample C2 Beacon PCAP</button>
+            <button class="btn" onclick="loadSamplePcap('dns')">🔍 Load Sample DNS Exfiltration PCAP</button>
+            <button class="btn" onclick="loadSamplePcap('scan')">⚡ Load Sample Port Scan PCAP</button>
+            <button class="btn" onclick="exportPcapJSON()">📥 Export Parsed Packets JSON</button>
           </div>
         </div>
 
+        <!-- Threat Summary Box -->
         <div id="pcap-threat-summary"></div>
 
-        <div class="card" style="margin-bottom: 1.5rem;">
-          <div class="card-title">📊 Parsed Packet Telemetry List</div>
-          <div style="max-height: 300px; overflow-y: auto;">
+        <!-- Packet Filter Toolbar -->
+        <div class="toolbar" style="margin-bottom:0.75rem;">
+          <div class="toolbar-group" style="flex:1;">
+            <span class="toolbar-label">Packet Display Filter:</span>
+            <input type="text" id="pcap-filter-input" placeholder="e.g. dns, tcp, port 8443, ip.src == 192.168.1.100" style="flex:1;">
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="applyPcapFilter()">Apply Filter</button>
+          <button class="btn btn-sm" onclick="resetPcapFilter()">Clear</button>
+        </div>
+
+        <!-- Parsed Packet Table -->
+        <div class="card">
+          <div class="card-title">
+            <span>📊 Parsed Packet Telemetry Stream</span>
+            <span id="pcap-packet-counter" class="badge badge-neutral">0 Packets</span>
+          </div>
+          <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
             <table class="soc-table">
               <thead>
                 <tr>
                   <th>No.</th>
                   <th>Timestamp</th>
-                  <th>Source IP</th>
-                  <th>Destination</th>
+                  <th>Source IP:Port</th>
+                  <th>Destination IP:Port</th>
                   <th>Protocol</th>
                   <th>Length</th>
                   <th>Info</th>
                 </tr>
               </thead>
               <tbody id="pcap-table-body">
-                <tr><td colspan="7" style="text-align:center; color: var(--text-muted);">No PCAP file loaded. Select a PCAP capture file or click 'Load Sample'.</td></tr>
+                <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 2rem;">No PCAP file loaded. Select a PCAP capture file or click a sample button above.</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
+        <!-- Inspector Split -->
         <div class="grid-equal">
           <div class="card">
-            <div class="card-title">🔍 Packet Protocol Layer Details (Tree View)</div>
-            <div id="pcap-packet-tree" style="min-height: 180px; background: var(--bg-canvas); padding: 1rem; border-radius: 4px; border: 1px solid var(--border-subtle);">
-              <p style="color: var(--text-muted); font-size: 0.85rem;">Select a packet row above to inspect layer headers.</p>
+            <div class="card-title">🔍 Wireshark-Style Protocol Tree</div>
+            <div id="pcap-packet-tree" style="min-height: 220px; max-height: 320px; overflow-y: auto; background: var(--bg-canvas); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6;">
+              <p style="color: var(--text-muted);">Select a packet row above to inspect layer headers.</p>
             </div>
           </div>
 
           <div class="card">
             <div class="card-title">💻 Packet Raw Hex & ASCII Data Inspector</div>
-            <pre id="pcap-hex-view" style="min-height: 180px; max-height: 250px; overflow-y: auto; background: var(--bg-canvas); padding: 1rem; border-radius: 4px; border: 1px solid var(--border-subtle); font-family: 'JetBrains Mono'; font-size: 0.75rem; color: #38bdf8;">
+            <pre id="pcap-hex-view" style="min-height: 220px; max-height: 320px; overflow-y: auto; background: var(--bg-canvas); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 0.75rem; color: #38bdf8; white-space: pre-wrap;">
 Select a packet row to view Hex & ASCII payload.
             </pre>
           </div>
         </div>
       </section>
 
-      <!-- View: Network Traffic -->
-      <section id="view-traffic" class="view-section hidden">
-        <div class="card">
-          <div class="card-title">🌐 Raw Network Flow Telemetry</div>
-          <table class="soc-table">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Source IP</th>
-                <th>Src Port</th>
-                <th>Destination IP</th>
-                <th>Dst Port</th>
-                <th>Proto</th>
-                <th>State</th>
-                <th>Log Source</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>2026-09-07 15:52:12</td><td>192.168.1.100</td><td>52030</td><td>10.0.0.99</td><td>8443</td><td>tcp</td><td>SF</td><td>conn</td></tr>
-              <tr><td>2026-09-07 15:51:42</td><td>192.168.1.100</td><td>52029</td><td>10.0.0.99</td><td>8443</td><td>tcp</td><td>SF</td><td>conn</td></tr>
-              <tr><td>2026-09-07 15:51:12</td><td>192.168.1.100</td><td>52028</td><td>10.0.0.99</td><td>8443</td><td>tcp</td><td>SF</td><td>conn</td></tr>
-              <tr><td>2026-09-07 15:50:42</td><td>192.168.1.100</td><td>52027</td><td>10.0.0.99</td><td>8443</td><td>tcp</td><td>SF</td><td>conn</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- View: Alerts -->
+      <!-- ========================================== -->
+      <!-- VIEW: ALERTS & TRIAGE -->
+      <!-- ========================================== -->
       <section id="view-alerts" class="view-section hidden">
         <div class="card">
-          <div class="card-title">🚨 Active Security Alerts</div>
-          <table class="soc-table">
-            <thead>
-              <tr>
-                <th>Alert ID</th>
-                <th>Type</th>
-                <th>Source</th>
-                <th>Destination</th>
-                <th>Severity</th>
-                <th>Score</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>97177280</td>
-                <td>BEACONING</td>
-                <td>192.168.1.100</td>
-                <td>10.0.0.99:8443</td>
-                <td><span class="badge badge-critical">CRITICAL</span></td>
-                <td>100</td>
-                <td>NEW</td>
-                <td><button class="btn" onclick="openAlertDrawer('97177280-8a9c-4c28-945a-a10232972a46')">Inspect 🔍</button></td>
-              </tr>
-              <tr>
-                <td>4fafa33d</td>
-                <td>RARE_DESTINATION</td>
-                <td>192.168.1.12</td>
-                <td>192.168.99.99:4444</td>
-                <td><span class="badge badge-high">HIGH</span></td>
-                <td>75</td>
-                <td>INVESTIGATING</td>
-                <td><button class="btn" onclick="openAlertDrawer('4fafa33d-6afe-4115-baf0-06d115fc752d')">Inspect 🔍</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+          <div class="card-title">
+            <span>🚨 Active Security Alerts & Forensic Triage</span>
+            <div class="card-title-actions">
+              <button class="btn btn-sm btn-primary" onclick="openAddAlertModal()">➕ Create Custom Alert</button>
+              <button class="btn btn-sm" onclick="bulkInvestigateAlerts()">Mark All Investigating 🔍</button>
+              <button class="btn btn-sm" onclick="exportAlertsReport()">Export Alerts 📥</button>
+            </div>
+          </div>
 
-      <!-- View: C2 Detection -->
-      <section id="view-c2" class="view-section hidden">
-        <div class="card">
-          <div class="card-title">📡 C2 Beaconing Candidates</div>
-          <table class="soc-table">
-            <thead>
-              <tr>
-                <th>Source IP</th>
-                <th>Destination IP</th>
-                <th>Port</th>
-                <th>Conns</th>
-                <th>Avg Interval</th>
-                <th>Stdev</th>
-                <th>CV</th>
-                <th>Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>192.168.1.100</td>
-                <td>10.0.0.99</td>
-                <td>8443</td>
-                <td>30</td>
-                <td>30.01s</td>
-                <td>0.38s</td>
-                <td>0.0125</td>
-                <td><span class="badge badge-critical">100</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <!-- Alert Toolbar -->
+          <div class="toolbar">
+            <div class="toolbar-group">
+              <span class="toolbar-label">Search:</span>
+              <input type="text" id="alerts-search-input" placeholder="Search alert type, IP, or ID..." style="width: 200px;">
+            </div>
+            <div class="toolbar-group">
+              <span class="toolbar-label">Severity:</span>
+              <select id="alerts-sev-filter">
+                <option value="ALL">All Severities</option>
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="LOW">LOW</option>
+              </select>
+            </div>
+            <div class="toolbar-group">
+              <span class="toolbar-label">Status:</span>
+              <select id="alerts-status-filter">
+                <option value="ALL">All Statuses</option>
+                <option value="NEW">NEW</option>
+                <option value="INVESTIGATING">INVESTIGATING</option>
+                <option value="RESOLVED">RESOLVED</option>
+                <option value="FALSE_POSITIVE">FALSE POSITIVE</option>
+              </select>
+            </div>
+            <div class="toolbar-group">
+              <span class="toolbar-label">Type:</span>
+              <select id="alerts-type-filter">
+                <option value="ALL">All Types</option>
+                <option value="BEACONING">C2 BEACONING</option>
+                <option value="RARE_DESTINATION">RARE DESTINATION</option>
+                <option value="DNS_ANOMALY">DNS ANOMALY</option>
+                <option value="PORT_SCAN">PORT SCAN</option>
+              </select>
+            </div>
+          </div>
 
-        <div class="card" style="margin-top: 1.5rem;">
-          <div class="card-title">📈 Interval Regularity Pulse</div>
-          <div style="height: 250px; position: relative;">
-            <canvas id="chart-c2-pulse"></canvas>
+          <!-- Table -->
+          <div class="table-responsive">
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>Alert ID</th>
+                  <th>Timestamp</th>
+                  <th>Alert Type</th>
+                  <th>Source ➔ Destination</th>
+                  <th>Severity</th>
+                  <th>Risk Score</th>
+                  <th>Status</th>
+                  <th>Analyst</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="alerts-tbody"></tbody>
+            </table>
           </div>
         </div>
       </section>
 
-      <!-- View: DNS Analysis -->
+      <!-- ========================================== -->
+      <!-- VIEW: C2 DETECTION -->
+      <!-- ========================================== -->
+      <section id="view-c2" class="view-section hidden">
+        <!-- Detection Algorithm Controls Card -->
+        <div class="card">
+          <div class="card-title">
+            <span>⚙️ Behavioral C2 Beaconing Detector Parameters</span>
+            <span class="badge badge-safe">DETECTOR ACTIVE</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1rem;">
+            <div>
+              <label style="font-size:0.75rem; color:var(--text-secondary); display:block; margin-bottom:0.35rem;">
+                Coefficient of Variation (CV) Threshold: <strong id="c2-cv-display" style="color:var(--sev-high); font-family:var(--font-mono);">0.15</strong>
+              </label>
+              <input type="range" id="c2-cv-slider" min="0.02" max="0.30" step="0.01" value="0.15" style="width:100%;">
+              <span style="font-size:0.68rem; color:var(--text-muted);">Lower = stricter interval regularity filter</span>
+            </div>
+            <div>
+              <label style="font-size:0.75rem; color:var(--text-secondary); display:block; margin-bottom:0.35rem;">
+                Min Connections Threshold: <strong id="c2-minconn-display" style="color:var(--accent-cyan); font-family:var(--font-mono);">10</strong>
+              </label>
+              <input type="range" id="c2-minconn-slider" min="3" max="50" step="1" value="10" style="width:100%;">
+              <span style="font-size:0.68rem; color:var(--text-muted);">Minimum successive flows to calculate stdev</span>
+            </div>
+            <div>
+              <label style="font-size:0.75rem; color:var(--text-secondary); display:block; margin-bottom:0.35rem;">Destination Port Focus</label>
+              <select id="c2-port-filter" style="width:100%;">
+                <option value="ALL">All Ports</option>
+                <option value="NON_STANDARD" selected>Non-Standard Only (Exclude 80/443)</option>
+                <option value="8443">Port 8443 (Known C2 Proxy)</option>
+                <option value="4444">Port 4444 (Metasploit Default)</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+              <button class="btn btn-primary" onclick="recalculateC2Detection()" style="width:100%;">⚡ Re-Run Detection Engine</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- C2 Candidates Table -->
+        <div class="card">
+          <div class="card-title">
+            <span>📡 Flagged C2 Beaconing Candidates (High Jitter Regularity)</span>
+            <span id="c2-candidate-count" class="badge badge-critical">1 Confirmed Candidate</span>
+          </div>
+          <div class="table-responsive">
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>Source IP</th>
+                  <th>Destination IP</th>
+                  <th>Port</th>
+                  <th>Flow Count</th>
+                  <th>Avg Interval</th>
+                  <th>Interval Stdev</th>
+                  <th>CV Ratio</th>
+                  <th>Threat Score</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="c2-candidates-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Regularity Pulse Chart -->
+        <div class="grid-2col">
+          <div class="card">
+            <div class="card-title">📈 Interval Regularity Pulse Analysis (Successive Inter-Arrival Delays)</div>
+            <div style="height: 250px; position: relative;">
+              <canvas id="chart-c2-pulse"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">🛡️ Automated Containment Recommendations</div>
+            <div style="font-size:0.8rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:0.75rem;">
+              <div style="padding:0.75rem; background:var(--bg-canvas); border-left:3px solid var(--sev-critical); border-radius:var(--radius-sm);">
+                <strong style="color:var(--sev-critical);">Recommended Host Isolation:</strong>
+                <p style="margin-top:0.25rem;">Host <code>192.168.1.100</code> is actively communicating with suspicious C2 node <code>10.0.0.99:8443</code> at high periodic frequency (30.0s interval).</p>
+              </div>
+              <div style="padding:0.75rem; background:var(--bg-canvas); border-left:3px solid var(--sev-high); border-radius:var(--radius-sm);">
+                <strong style="color:var(--sev-high);">Firewall Drop Rule:</strong>
+                <pre style="margin-top:0.25rem; font-family:var(--font-mono); font-size:0.75rem; color:#38bdf8; overflow-x:auto;">iptables -A OUTPUT -d 10.0.0.99 -p tcp --dport 8443 -j DROP</pre>
+                <button class="btn btn-sm" onclick="copyContainmentRule('iptables -A OUTPUT -d 10.0.0.99 -p tcp --dport 8443 -j DROP')" style="margin-top:0.5rem;">📋 Copy Rule</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: DNS ANALYSIS -->
+      <!-- ========================================== -->
       <section id="view-dns" class="view-section hidden">
+        <!-- Interactive Domain Shannon Entropy Calculator Card -->
         <div class="card">
-          <div class="card-title">🔍 DNS Anomaly Telemetry</div>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
-            ℹ️ Disclaimer: These indicators contribute to investigation risk. They do not, individually or combined, constitute proof of malicious activity.
+          <div class="card-title">
+            <span>🔬 Live Shannon Entropy & DGA Domain Testing Tool</span>
+            <span class="badge badge-low">INTERACTIVE TESTER</span>
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1rem;">
+            Test any domain query string against the SOC entropy calculator, length thresholds, and DGA heuristic models.
           </p>
-          <table class="soc-table">
-            <thead>
-              <tr>
-                <th>Source IP</th>
-                <th>Domain Query</th>
-                <th>Indicator Type</th>
-                <th>Risk Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>192.168.1.100</td>
-                <td>encoded-c2-stage2-exfil-payload.malicious-sim.org</td>
-                <td>Long Domain (>50 chars)</td>
-                <td><span class="badge badge-high">75</span></td>
-              </tr>
-              <tr>
-                <td>192.168.1.100</td>
-                <td>chunk0.exfiltration-tunnel.test.org</td>
-                <td>Excessive Subdomains (8 labels)</td>
-                <td><span class="badge badge-high">80</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+            <input type="text" id="dns-test-input" value="encoded-c2-stage2-exfil-payload.malicious-sim.org" style="flex:1; min-width:300px;">
+            <button class="btn btn-primary" onclick="testCustomDomainEntropy()">Calculate Entropy & Assess Threat 🧪</button>
+            <button class="btn" onclick="testPresetDomain('dga')">Sample DGA</button>
+            <button class="btn" onclick="testPresetDomain('benign')">Sample Benign</button>
+          </div>
+          <div id="dns-entropy-result" style="margin-top:1rem;"></div>
         </div>
-      </section>
 
-      <!-- View: Evidence -->
-      <section id="view-evidence" class="view-section hidden">
+        <!-- DNS Query Telemetry Table -->
         <div class="card">
-          <div class="card-title">📁 Evidence Locker</div>
-          <table class="soc-table">
-            <thead>
-              <tr>
-                <th>Filename</th>
-                <th>Type</th>
-                <th>Size</th>
-                <th>Directory</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>sample_c2_beacon.pcap</td><td>Raw PCAP</td><td>1.2 MB</td><td>data/raw</td></tr>
-              <tr><td>conn.log</td><td>Zeek Log</td><td>340 KB</td><td>data/zeek/sample_batch</td></tr>
-              <tr><td>report_20260907.json</td><td>JSON Evidence</td><td>12 KB</td><td>data/alerts</td></tr>
-            </tbody>
-          </table>
+          <div class="card-title">
+            <span>🔍 DNS Telemetry & Tunneling Indicators</span>
+            <div class="card-title-actions">
+              <input type="text" id="dns-search-input" placeholder="Search domain or IP..." style="width:200px;">
+              <select id="dns-indicator-filter">
+                <option value="ALL">All Indicators</option>
+                <option value="LONG_DOMAIN">Long Domain (>50 chars)</option>
+                <option value="SUBDOMAIN_TUNNEL">Subdomain Tunneling</option>
+                <option value="HIGH_ENTROPY">High Entropy (>3.8)</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Source IP</th>
+                  <th>Domain Query</th>
+                  <th>Query Type</th>
+                  <th>Entropy</th>
+                  <th>Indicator Type</th>
+                  <th>Risk Score</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="dns-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <!-- View: Rules -->
+      <!-- ========================================== -->
+      <!-- VIEW: MITRE ATT&CK -->
+      <!-- ========================================== -->
+      <section id="view-mitre" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">
+            <span>⚔️ Enterprise MITRE ATT&CK Matrix & Detection Coverage</span>
+            <div class="card-title-actions">
+              <span class="badge badge-safe">7 Techniques Detected</span>
+              <button class="btn btn-sm" onclick="exportMitreCoverage()">Export Coverage Matrix 📥</button>
+            </div>
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1rem;">
+            Interactive tactics and techniques mapped against active detection rules and triggered telemetry. Click any technique card to inspect detection rules and forensic evidence.
+          </p>
+
+          <div class="mitre-matrix" id="mitre-matrix-container"></div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: DETECTION RULES ENGINE -->
+      <!-- ========================================== -->
       <section id="view-rules" class="view-section hidden">
         <div class="card">
-          <div class="card-title">⚙️ Detection Rules Engine</div>
-          <table class="soc-table">
-            <thead>
-              <tr>
-                <th>Rule ID</th>
-                <th>Rule Name</th>
-                <th>Status</th>
-                <th>Severity</th>
-                <th>Threshold</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>RULE_BEACON</td><td>C2 Beaconing Detector</td><td><span class="badge badge-safe">ENABLED</span></td><td>HIGH</td><td>0.15 (CV)</td></tr>
-              <tr><td>RULE_DNS_LONG</td><td>DNS Long Domain Detector</td><td><span class="badge badge-safe">ENABLED</span></td><td>MEDIUM</td><td>50 chars</td></tr>
-              <tr><td>RULE_RARE_DEST</td><td>Rare Destination Detector</td><td><span class="badge badge-safe">ENABLED</span></td><td>MEDIUM</td><td>0.05 pct</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+          <div class="card-title">
+            <span>⚙️ Behavioral Detection Rules Engine & Threshold Configurator</span>
+            <div class="card-title-actions">
+              <button class="btn btn-sm btn-primary" onclick="openAddRuleModal()">➕ Create Detection Rule</button>
+              <button class="btn btn-sm" onclick="resetDefaultRules()">Reset Defaults 🔄</button>
+            </div>
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1rem;">
+            Rules execute in real-time on live packet streams and ingested Zeek logs. Toggle rule execution or customize thresholds dynamically.
+          </p>
 
-      <!-- View: Reports -->
-      <section id="view-reports" class="view-section hidden">
-        <div class="card">
-          <div class="card-title">📄 Export Reports</div>
-          <p style="color: var(--text-secondary); margin-bottom: 1rem;">Generate executive SOC threat reports in JSON and CSV formats.</p>
-          <div style="display: flex; gap: 1rem;">
-            <button class="btn btn-primary" onclick="exportReport('json')">Download JSON Report 📥</button>
-            <button class="btn" onclick="exportReport('csv')">Download CSV Export 📊</button>
+          <div class="table-responsive">
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>Rule ID</th>
+                  <th>Rule Name</th>
+                  <th>Category</th>
+                  <th>Severity</th>
+                  <th>Threshold / Condition</th>
+                  <th>Active Status</th>
+                  <th>Hits</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="rules-tbody"></tbody>
+            </table>
           </div>
         </div>
       </section>
 
-      <!-- View: Settings & Documentation -->
-      <section id="view-settings" class="view-section hidden">
-        <div class="card" style="margin-bottom: 1.5rem;">
-          <div class="card-title">🚀 Local Physical NIC Packet Scanner Guide</div>
-          <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-            To capture <strong>real live physical network packets</strong> (like Wireshark & Burp Suite):
+      <!-- ========================================== -->
+      <!-- VIEW: IP THREAT INTEL -->
+      <!-- ========================================== -->
+      <section id="view-ipintel" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">
+            <span>🎯 Host & IP Threat Intelligence Investigation Workbench</span>
+          </div>
+          <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem;">
+            <input type="text" id="ipintel-search-input" value="10.0.0.99" placeholder="Enter IP address to investigate..." style="width:260px;">
+            <button class="btn btn-primary" onclick="lookupIpIntel()">Investigate Host 🔍</button>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Quick picks:</span>
+            <button class="btn btn-sm" onclick="quickPickIp('10.0.0.99')">10.0.0.99 (C2)</button>
+            <button class="btn btn-sm" onclick="quickPickIp('192.168.1.100')">192.168.1.100 (Internal)</button>
+            <button class="btn btn-sm" onclick="quickPickIp('192.168.99.99')">192.168.99.99 (Rare)</button>
+            <button class="btn btn-sm" onclick="quickPickIp('8.8.8.8')">8.8.8.8 (Google DNS)</button>
+          </div>
+
+          <div id="ipintel-result-container"></div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: CASES & INCIDENT RESPONSE -->
+      <!-- ========================================== -->
+      <section id="view-cases" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">
+            <span>📁 SOC Incident Cases & Case Management</span>
+            <div class="card-title-actions">
+              <button class="btn btn-sm btn-primary" onclick="openCreateCaseModal()">➕ Create Incident Case</button>
+              <button class="btn btn-sm" onclick="exportCasesJSON()">Export Cases 📥</button>
+            </div>
+          </div>
+          <div class="toolbar">
+            <div class="toolbar-group">
+              <span class="toolbar-label">Status:</span>
+              <select id="case-status-filter">
+                <option value="ALL">All Statuses</option>
+                <option value="OPEN">OPEN</option>
+                <option value="IN_PROGRESS">IN PROGRESS</option>
+                <option value="CLOSED">CLOSED</option>
+              </select>
+            </div>
+            <div class="toolbar-group">
+              <span class="toolbar-label">Priority:</span>
+              <select id="case-priority-filter">
+                <option value="ALL">All Priorities</option>
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>Case ID</th>
+                  <th>Title</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Lead Analyst</th>
+                  <th>Linked Alerts</th>
+                  <th>Created At</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="cases-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: EVIDENCE LOCKER -->
+      <!-- ========================================== -->
+      <section id="view-evidence" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">
+            <span>🗂️ Forensic Evidence Locker & Artifact Browser</span>
+            <div class="card-title-actions">
+              <button class="btn btn-sm btn-primary" onclick="openUploadEvidenceModal()">➕ Upload Artifact</button>
+              <button class="btn btn-sm" onclick="exportEvidenceManifest()">Download Manifest 📥</button>
+            </div>
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1rem;">
+            Immutable forensic artifacts with cryptographic SHA-256 verification, raw payload previews, and 1-click downloads.
           </p>
-          <ol style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6; padding-left: 1.25rem;">
-            <li><strong>Install Npcap Driver</strong>: Run <code>install_npcap.bat</code> (bundled in the repository at <code>installers/npcap-setup.exe</code>).</li>
-            <li><strong>Run Streamlit SOC Dashboard</strong>: Right-click <code>start_soc.bat</code> and select <strong>Run as Administrator</strong>.</li>
-            <li><strong>Open Local SOC Cockpit</strong>: Go to <code>http://localhost:8501</code> in your browser.</li>
-            <li><strong>Log In Credentials</strong>:
-              <ul>
-                <li><strong>Admin Account</strong>: <code>admin</code> / <code>Admin@123</code> (Role: <code>ADMIN</code>)</li>
-                <li><strong>Analyst Account</strong>: <code>analyst</code> / <code>Analyst@123</code> (Role: <code>ANALYST</code>)</li>
-              </ul>
-            </li>
-          </ol>
+
+          <div class="table-responsive">
+            <table class="soc-table">
+              <thead>
+                <tr>
+                  <th>Filename</th>
+                  <th>Artifact Type</th>
+                  <th>File Size</th>
+                  <th>SHA-256 Hash</th>
+                  <th>Captured Date</th>
+                  <th>Directory</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="evidence-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: THREAT HUNTER (GLOBAL SEARCH) -->
+      <!-- ========================================== -->
+      <section id="view-search" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">
+            <span>🔎 Global Threat Hunter & Universal Telemetry Query</span>
+          </div>
+          <div style="display:flex; gap:0.75rem; align-items:center; margin-bottom:1rem;">
+            <input type="text" id="hunter-query-input" placeholder="Search any IP (192.168.1.100), port (8443), protocol (tcp), domain, or keyword..." style="flex:1;">
+            <button class="btn btn-primary" onclick="executeThreatHunt()">Run Threat Hunt 🔍</button>
+            <button class="btn" onclick="clearThreatHunt()">Clear</button>
+          </div>
+
+          <div id="hunter-results-summary" style="margin-bottom:1rem; font-size:0.82rem; color:var(--text-secondary);"></div>
+
+          <div id="hunter-results-container"></div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: REPORTS -->
+      <!-- ========================================== -->
+      <section id="view-reports" class="view-section hidden">
+        <div class="card">
+          <div class="card-title">
+            <span>📄 Executive & Forensic SOC Intelligence Report Generator</span>
+          </div>
+          <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size:0.82rem;">
+            Generate formal, print-ready SOC incident reports, executive threat summaries, and compliance audit dossiers with live preview and multi-format exports.
+          </p>
+
+          <div class="toolbar" style="margin-bottom:1.5rem;">
+            <div class="toolbar-group">
+              <span class="toolbar-label">Report Type:</span>
+              <select id="report-type-select">
+                <option value="executive">Executive Threat Briefing</option>
+                <option value="incident">Incident Forensics Dossier</option>
+                <option value="c2">C2 Beaconing Technical Audit</option>
+                <option value="ioc">Threat Indicators (IOC) Export</option>
+              </select>
+            </div>
+            <div class="toolbar-group">
+              <span class="toolbar-label">Time Window:</span>
+              <select id="report-window-select">
+                <option value="24h">Past 24 Hours</option>
+                <option value="7d">Past 7 Days</option>
+                <option value="all">Full Historical Archive</option>
+              </select>
+            </div>
+            <div class="toolbar-group">
+              <span class="toolbar-label">Classification:</span>
+              <select id="report-class-select">
+                <option value="TLP:CLEAR">TLP:CLEAR / Public</option>
+                <option value="TLP:AMBER">TLP:AMBER / Restricted</option>
+                <option value="CONFIDENTIAL">CONFIDENTIAL / Internal</option>
+              </select>
+            </div>
+            <div style="display:flex; gap:0.5rem; margin-left:auto;">
+              <button class="btn btn-primary" onclick="generateReportPreview()">Preview Report 👁️</button>
+              <button class="btn" onclick="printReport()">Print / Save PDF 🖨️</button>
+              <button class="btn" onclick="exportReport('json')">Download JSON 📥</button>
+              <button class="btn" onclick="exportReport('csv')">Download CSV 📊</button>
+              <button class="btn" onclick="copyReportMarkdown()">Copy Markdown 📋</button>
+            </div>
+          </div>
+
+          <!-- Report Live Printable Document Preview -->
+          <div id="report-preview-container" class="report-paper"></div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: SETTINGS & SETUP GUIDE -->
+      <!-- ========================================== -->
+      <section id="view-settings" class="view-section hidden">
+        <div class="grid-2col">
+          <div class="card">
+            <div class="card-title">🔧 Operational Dashboard Settings</div>
+            <div style="display:flex; flex-direction:column; gap:1.25rem;">
+              <div>
+                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:0.35rem;">Interface Theme</label>
+                <select id="settings-theme-select" style="width:100%;" onchange="applyTheme(this.value)">
+                  <option value="default">Dark SOC (Default Navy #070a0f)</option>
+                  <option value="cyber">Cyber Midnight (Electric Cyan)</option>
+                  <option value="matrix">Emerald Matrix (Hacker Green)</option>
+                  <option value="contrast">High Contrast Dark (#000000)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="font-size:0.8rem; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+                  <span>Audio Alert on Critical Detections 🔊</span>
+                  <label class="switch">
+                    <input type="checkbox" id="settings-audio-toggle">
+                    <span class="slider"></span>
+                  </label>
+                </label>
+                <p style="font-size:0.72rem; color:var(--text-muted); margin-top:0.25rem;">Play synthetic frequency alert chirp when CRITICAL alert is triggered.</p>
+              </div>
+
+              <div>
+                <label style="font-size:0.8rem; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+                  <span>Background Telemetry Simulation</span>
+                  <label class="switch">
+                    <input type="checkbox" id="settings-sim-toggle" checked>
+                    <span class="slider"></span>
+                  </label>
+                </label>
+                <p style="font-size:0.72rem; color:var(--text-muted); margin-top:0.25rem;">Emit realistic background network flows to keep live graphs reactive.</p>
+              </div>
+
+              <div style="border-top:1px solid var(--border-subtle); padding-top:1rem;">
+                <label style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:0.5rem;">State & Database Maintenance</label>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                  <button class="btn btn-sm btn-danger" onclick="resetAllDemoData()">🔄 Reset to Clean State</button>
+                  <button class="btn btn-sm" onclick="seedSampleBatch()">➕ Seed 50 Telemetry Events</button>
+                  <button class="btn btn-sm" onclick="backupStateJSON()">💾 Backup State JSON</button>
+                  <button class="btn btn-sm" onclick="restoreStateJSONPrompt()">📥 Restore State</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🚀 Local Physical NIC Packet Scanner Guide</div>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size:0.82rem;">
+              To capture <strong>real live physical network packets</strong> (like Wireshark & Burp Suite):
+            </p>
+            <ol style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.6; padding-left: 1.25rem;">
+              <li><strong>Install Npcap Driver</strong>: Run <code>install_npcap.bat</code> (bundled at <code>installers/npcap-setup.exe</code>).</li>
+              <li><strong>Run Streamlit SOC Dashboard</strong>: Right-click <code>start_soc.bat</code> and select <strong>Run as Administrator</strong>.</li>
+              <li><strong>Open Local SOC Cockpit</strong>: Go to <code>http://localhost:8501</code> in your browser.</li>
+              <li><strong>Log In Credentials</strong>:
+                <ul style="padding-left:1.25rem; margin-top:0.25rem;">
+                  <li><strong>Admin</strong>: <code>admin</code> / <code>Admin@123</code> (Full privileges)</li>
+                  <li><strong>Analyst</strong>: <code>analyst</code> / <code>Analyst@123</code> (Read-only rules)</li>
+                </ul>
+              </li>
+            </ol>
+          </div>
         </div>
 
         <div class="card">
           <div class="card-title">🔧 Operational System Configuration</div>
-          <pre style="background-color: var(--bg-canvas); padding: 1rem; border-radius: 4px; font-family: 'JetBrains Mono'; font-size: 0.8rem; color: #38bdf8;">
+          <pre style="background-color: var(--bg-canvas); padding: 1rem; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.8rem; color: #38bdf8;">
 repository: "https://github.com/noobkushal/C2.git"
 github_pages: "https://noobkushal.github.io/C2/"
-application:
-  db_path: "data/netwatch.db"
-  log_level: "INFO"
-  analysis_window_hours: 24
-  bundled_driver: "installers/npcap-setup.exe"
-  launch_script: "start_soc.bat"
+platform_version: "2.5.0-SOC"
+runtime_mode: "Client-Side In-Browser + Scapy Ingestion Ready"
+bundled_drivers:
+  - "installers/npcap-setup.exe"
+  - "start_soc.bat"
+sqlite_database: "data/netwatch.db"
           </pre>
         </div>
       </section>
@@ -495,73 +1085,337 @@ application:
     </div>
   </main>
 
-  <!-- Login Modal -->
-  <div id="login-modal-overlay" class="drawer-overlay">
-    <div class="drawer-content" style="width: 420px; height: auto; border-radius: 8px; margin: auto; position: relative;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h2 style="font-size: 1.1rem;">🔑 User Authentication</h2>
-        <button onclick="closeLoginModal()" class="btn">✕</button>
+  <!-- ========================================== -->
+  <!-- MODAL: LOGIN / AUTH -->
+  <!-- ========================================== -->
+  <div id="login-modal-overlay" class="modal-overlay">
+    <div class="modal-content" style="width: 440px;">
+      <div class="modal-header">
+        <h3>🔑 SOC User Authentication</h3>
+        <button onclick="closeLoginModal()" class="btn btn-sm">✕</button>
       </div>
-      <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
-        Select account role or enter credentials to switch session:
+      <p style="font-size: 0.8rem; color: var(--text-secondary);">
+        Select account role or enter credentials to switch session privileges:
       </p>
       <div style="display: flex; flex-direction: column; gap: 0.85rem;">
         <div>
-          <label style="font-size: 0.75rem; color: var(--text-muted);">Username</label>
-          <input id="login-input-user" type="text" value="admin" style="width:100%; padding:0.5rem; background:var(--bg-canvas); border:1px solid var(--border-subtle); color:#fff; border-radius:4px;">
+          <label style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:0.25rem;">Username</label>
+          <input id="login-input-user" type="text" value="admin" style="width:100%;">
         </div>
         <div>
-          <label style="font-size: 0.75rem; color: var(--text-muted);">Password</label>
-          <input id="login-input-pass" type="password" value="Admin@123" style="width:100%; padding:0.5rem; background:var(--bg-canvas); border:1px solid var(--border-subtle); color:#fff; border-radius:4px;">
+          <label style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-bottom:0.25rem;">Password</label>
+          <input id="login-input-pass" type="password" value="Admin@123" style="width:100%;">
         </div>
         <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
           <button class="btn btn-primary" onclick="performLogin()" style="flex:1;">Login 🔓</button>
           <button class="btn" onclick="quickLogin('analyst')" style="flex:1;">Analyst Login</button>
+          <button class="btn" onclick="quickLogin('admin')" style="flex:1;">Admin Login</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Alert Inspection Drawer Modal -->
+  <!-- ========================================== -->
+  <!-- DRAWER: ALERT FORENSIC INSPECTOR -->
+  <!-- ========================================== -->
   <div id="drawer-overlay" class="drawer-overlay">
     <div class="drawer-content">
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h2 style="font-size: 1.1rem;">Alert Forensic Inspector</h2>
-        <button id="close-drawer" class="btn">✕ Close</button>
+        <h2 style="font-size: 1.15rem; font-weight:700;">Alert Forensic Inspector</h2>
+        <button id="close-drawer" class="btn btn-sm" onclick="closeAlertDrawer()">✕ Close</button>
       </div>
+
       <div>
-        <p style="font-size: 0.75rem; color: var(--text-muted);">Alert ID</p>
-        <p id="drawer-alert-id" style="font-family: 'JetBrains Mono'; font-size: 0.9rem; font-weight: 700;"></p>
+        <span style="font-size: 0.72rem; color: var(--text-muted);">Alert ID</span>
+        <p id="drawer-alert-id" style="font-family: var(--font-mono); font-size: 0.9rem; font-weight: 700; color:var(--text-primary);"></p>
       </div>
-      <div style="display: flex; gap: 1.5rem;">
+
+      <div style="display: flex; gap: 1.5rem; flex-wrap:wrap;">
         <div>
-          <p style="font-size: 0.75rem; color: var(--text-muted);">Type</p>
-          <p id="drawer-type" style="font-weight: 600;"></p>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Type</span>
+          <p id="drawer-type" style="font-weight: 700;"></p>
         </div>
         <div>
-          <p style="font-size: 0.75rem; color: var(--text-muted);">Severity</p>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Severity</span>
           <div id="drawer-sev"></div>
         </div>
         <div>
-          <p style="font-size: 0.75rem; color: var(--text-muted);">Risk Score</p>
-          <p id="drawer-score" style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--sev-critical);"></p>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Risk Score</span>
+          <p id="drawer-score" style="font-family: var(--font-mono); font-weight: 800; color: var(--sev-critical);"></p>
+        </div>
+        <div>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Status</span>
+          <div>
+            <select id="drawer-status-select" onchange="updateAlertStatusFromDrawer(this.value)" style="padding:0.25rem 0.5rem; font-size:0.75rem;">
+              <option value="NEW">NEW</option>
+              <option value="INVESTIGATING">INVESTIGATING</option>
+              <option value="RESOLVED">RESOLVED</option>
+              <option value="FALSE_POSITIVE">FALSE POSITIVE</option>
+            </select>
+          </div>
         </div>
       </div>
+
       <div>
-        <p style="font-size: 0.75rem; color: var(--text-muted);">Flow Pair</p>
-        <p id="drawer-source" style="font-family: 'JetBrains Mono';"></p>
+        <span style="font-size: 0.72rem; color: var(--text-muted);">Network Flow Vector</span>
+        <p id="drawer-source" style="font-family: var(--font-mono); font-size:0.85rem; color:var(--accent-cyan);"></p>
       </div>
+
       <div>
-        <p style="font-size: 0.75rem; color: var(--text-muted);">Summary Reason</p>
-        <p id="drawer-reason" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;"></p>
+        <span style="font-size: 0.72rem; color: var(--text-muted);">Forensic Detection Reason</span>
+        <div id="drawer-reason" style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.25rem; background:var(--bg-canvas); padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); line-height:1.5;"></div>
       </div>
-      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
-        <p style="font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem;">🛡️ Relevant ATT&CK Context</p>
-        <p style="font-size: 0.75rem; color: var(--text-secondary);">- <strong>T1071 — Application Layer Protocol</strong></p>
-        <p style="font-size: 0.7rem; color: var(--text-muted); padding-left: 0.75rem;">Technique potentially relevant to investigation — behavioral detection alone does not confirm this technique was used.</p>
+
+      <!-- ATT&CK Context -->
+      <div style="background:var(--bg-surface); padding:0.85rem; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+        <p style="font-size: 0.8rem; font-weight: 700; color:var(--text-primary); margin-bottom: 0.35rem;">🛡️ ATT&CK Mapping</p>
+        <p id="drawer-mitre" style="font-size: 0.78rem; color: var(--text-secondary);">- <strong>T1071 — Application Layer Protocol</strong> (C2 Channel)</p>
+      </div>
+
+      <!-- Analyst Investigation Notes -->
+      <div>
+        <span style="font-size: 0.72rem; color: var(--text-muted); display:block; margin-bottom:0.25rem;">Analyst Notes & Findings</span>
+        <textarea id="drawer-notes" rows="3" placeholder="Add forensic notes or triage updates..." style="width:100%;"></textarea>
+        <button class="btn btn-sm btn-primary" onclick="saveDrawerNotes()" style="margin-top:0.4rem;">Save Notes 💾</button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; gap:0.5rem; margin-top:auto; padding-top:1rem; border-top:1px solid var(--border-subtle);">
+        <button class="btn btn-sm" onclick="escalateDrawerAlertToCase()">Escalate to Case 📁</button>
+        <button class="btn btn-sm" onclick="investigateDrawerIp()">Investigate IP 🎯</button>
+        <button class="btn btn-sm btn-success" onclick="quickResolveDrawerAlert()">Resolve ✅</button>
       </div>
     </div>
   </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD CUSTOM ALERT -->
+  <!-- ========================================== -->
+  <div id="modal-add-alert" class="modal-overlay">
+    <div class="modal-content" style="width: 500px;">
+      <div class="modal-header">
+        <h3>➕ Create Custom Security Alert</h3>
+        <button onclick="closeModal('modal-add-alert')" class="btn btn-sm">✕</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:0.85rem;">
+        <div>
+          <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Alert Type</label>
+          <select id="modal-alert-type" style="width:100%;">
+            <option value="BEACONING">C2 BEACONING</option>
+            <option value="RARE_DESTINATION">RARE DESTINATION</option>
+            <option value="DNS_ANOMALY">DNS ANOMALY</option>
+            <option value="PORT_SCAN">PORT SCAN</option>
+            <option value="EXFILTRATION">DATA EXFILTRATION</option>
+          </select>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Source IP</label>
+            <input type="text" id="modal-alert-src" value="192.168.1.100" style="width:100%;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Destination IP:Port</label>
+            <input type="text" id="modal-alert-dst" value="198.51.100.44:8443" style="width:100%;">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Severity</label>
+            <select id="modal-alert-sev" style="width:100%;">
+              <option value="CRITICAL">CRITICAL</option>
+              <option value="HIGH">HIGH</option>
+              <option value="MEDIUM">MEDIUM</option>
+              <option value="LOW">LOW</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Risk Score (0-100)</label>
+            <input type="number" id="modal-alert-score" min="1" max="100" value="95" style="width:100%;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Forensic Reason</label>
+          <textarea id="modal-alert-reason" rows="2" style="width:100%;">Simulated manual threat trigger: suspicious outbound connection detected.</textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+          <button class="btn" onclick="closeModal('modal-add-alert')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitCustomAlert()">Create Alert 🚨</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD TEST NETWORK FLOW -->
+  <!-- ========================================== -->
+  <div id="modal-add-flow" class="modal-overlay">
+    <div class="modal-content" style="width: 500px;">
+      <div class="modal-header">
+        <h3>➕ Inject Network Flow Telemetry</h3>
+        <button onclick="closeModal('modal-add-flow')" class="btn btn-sm">✕</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:0.85rem;">
+        <div style="display:grid; grid-template-columns:2fr 1fr; gap:0.75rem;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Source IP</label>
+            <input type="text" id="flow-input-src" value="192.168.1.100" style="width:100%;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Src Port</label>
+            <input type="number" id="flow-input-sport" value="53120" style="width:100%;">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:2fr 1fr; gap:0.75rem;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Destination IP</label>
+            <input type="text" id="flow-input-dst" value="10.0.0.99" style="width:100%;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Dst Port</label>
+            <input type="number" id="flow-input-dport" value="8443" style="width:100%;">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Protocol</label>
+            <select id="flow-input-proto" style="width:100%;">
+              <option value="TCP">TCP</option>
+              <option value="UDP">UDP</option>
+              <option value="ICMP">ICMP</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Connection State</label>
+            <select id="flow-input-state" style="width:100%;">
+              <option value="SF">SF (Established)</option>
+              <option value="S0">S0 (SYN no ACK)</option>
+              <option value="REJ">REJ (Rejected)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+          <button class="btn" onclick="closeModal('modal-add-flow')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitCustomFlow()">Inject Flow 🌐</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: CREATE INCIDENT CASE -->
+  <!-- ========================================== -->
+  <div id="modal-create-case" class="modal-overlay">
+    <div class="modal-content" style="width: 550px;">
+      <div class="modal-header">
+        <h3>📁 Create Incident Response Case</h3>
+        <button onclick="closeModal('modal-create-case')" class="btn btn-sm">✕</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:0.85rem;">
+        <div>
+          <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Case Title</label>
+          <input type="text" id="case-input-title" value="Investigation: Potential C2 Channel to 10.0.0.99" style="width:100%;">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Priority</label>
+            <select id="case-input-priority" style="width:100%;">
+              <option value="CRITICAL">CRITICAL</option>
+              <option value="HIGH">HIGH</option>
+              <option value="MEDIUM">MEDIUM</option>
+              <option value="LOW">LOW</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Lead Analyst</label>
+            <input type="text" id="case-input-analyst" value="admin" style="width:100%;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Description / Scope</label>
+          <textarea id="case-input-desc" rows="3" style="width:100%;">Periodic beaconing traffic discovered from internal host 192.168.1.100. Investigating persistence mechanisms and exfiltration activity.</textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+          <button class="btn" onclick="closeModal('modal-create-case')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitCreateCase()">Open Case 📁</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD DETECTION RULE -->
+  <!-- ========================================== -->
+  <div id="modal-add-rule" class="modal-overlay">
+    <div class="modal-content" style="width: 520px;">
+      <div class="modal-header">
+        <h3>⚙️ Create Custom Detection Rule</h3>
+        <button onclick="closeModal('modal-add-rule')" class="btn btn-sm">✕</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:0.85rem;">
+        <div style="display:grid; grid-template-columns:1fr 2fr; gap:0.75rem;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Rule ID</label>
+            <input type="text" id="rule-input-id" value="RULE_CUSTOM_01" style="width:100%;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Rule Name</label>
+            <input type="text" id="rule-input-name" value="Custom Port Scanner Detector" style="width:100%;">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Category</label>
+            <select id="rule-input-category" style="width:100%;">
+              <option value="Beaconing">Beaconing</option>
+              <option value="DNS">DNS</option>
+              <option value="Scanning">Reconnaissance</option>
+              <option value="Exfiltration">Exfiltration</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Severity</label>
+            <select id="rule-input-sev" style="width:100%;">
+              <option value="CRITICAL">CRITICAL</option>
+              <option value="HIGH">HIGH</option>
+              <option value="MEDIUM">MEDIUM</option>
+              <option value="LOW">LOW</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Condition / Threshold</label>
+          <input type="text" id="rule-input-threshold" value="> 15 SYN packets to distinct ports within 5s" style="width:100%;">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+          <button class="btn" onclick="closeModal('modal-add-rule')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitCreateRule()">Save Rule ⚙️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: EVIDENCE PREVIEW -->
+  <!-- ========================================== -->
+  <div id="modal-evidence-preview" class="modal-overlay">
+    <div class="modal-content" style="width: 700px;">
+      <div class="modal-header">
+        <h3 id="evidence-preview-title">Forensic Artifact Preview</h3>
+        <button onclick="closeModal('modal-evidence-preview')" class="btn btn-sm">✕</button>
+      </div>
+      <div>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.5rem;">SHA-256 Hash: <strong id="evidence-preview-hash" style="font-family:var(--font-mono); color:var(--accent-cyan);"></strong></p>
+        <pre id="evidence-preview-body" style="background:var(--bg-canvas); padding:1rem; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); max-height:400px; overflow-y:auto; font-family:var(--font-mono); font-size:0.75rem; color:#38bdf8; white-space:pre-wrap;"></pre>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+        <button class="btn" onclick="closeModal('modal-evidence-preview')">Close</button>
+        <button id="evidence-preview-download-btn" class="btn btn-primary">Download Artifact 📥</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
 
   <script src="app.js"></script>
 </body>
